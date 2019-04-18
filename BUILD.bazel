@@ -1,27 +1,29 @@
 
 cc_library(
   name = "lib",
-  hdrs = ["include/zen/either.hpp", "include/zen/config.hpp"],
+  hdrs = ["include/zen/box.hpp", "include/zen/either.hpp", "include/zen/config.hpp"],
   includes = ["include"],
+  copts = ['-std=c++17'],
 )
 
 cc_test(
   name = "tests",
   srcs = glob(["test/*.cc"]),
   deps = [":lib", "@googletest//:gtest_main"],
+  copts = ['-std=c++17'],
 )
 
 cc_test(
   name = "tests_noexcept",
   srcs = glob(["test/*.cc"]),
   deps = [":lib", "@googletest//:gtest_main"],
-  copts = ["-fno-exceptions"]
+  copts = ["-std=c++17", "-fno-exceptions"]
 )
 
 cc_test(
   name = "tests_nortti",
   srcs = glob(["test/*.cc"]),
   deps = [":lib", "@googletest//:gtest_main"],
-  copts = ["-fno-rtti"]
+  copts = ["-std=c++17", "-fno-rtti"]
 )
 
