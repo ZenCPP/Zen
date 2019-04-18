@@ -11,3 +11,17 @@ cc_test(
   deps = [":lib", "@googletest//:gtest_main"],
 )
 
+cc_test(
+  name = "tests_noexcept",
+  srcs = glob(["test/*.cc"]),
+  deps = [":lib", "@googletest//:gtest_main"],
+  copts = ["-fno-exceptions"]
+)
+
+cc_test(
+  name = "tests_nortti",
+  srcs = glob(["test/*.cc"]),
+  deps = [":lib", "@googletest//:gtest_main"],
+  copts = ["-fno-rtti"]
+)
+
