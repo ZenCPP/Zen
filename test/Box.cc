@@ -3,69 +3,72 @@
 
 #include "zen/box.hpp"
 
-using namespace zen;
+#include "util.hpp"
 
-namespace box_test {
+static_assert(!zen::IsPlainReference<int>::value, "");
+static_assert(zen::IsPlainReference<int&>::value, "");
+static_assert(!zen::IsPlainReference<int&&>::value, "");
+static_assert(!zen::IsPlainReference<A>::value, "");
+static_assert(zen::IsPlainReference<A&>::value, "");
+static_assert(!zen::IsPlainReference<A&&>::value, "");
 
-  class A {
-  public:
-    virtual ~A() {  };
-    virtual A* clone() const = 0;
-  };
-
-  class B : public A {
-  public:
-    int someData = 43;
-    ~B() override {  }
-    B* clone() const override { return new B(); }
-  };
-
-  class C : public A {
-    int& destroyCount;
-  public:
-    C(int& destroyCount): destroyCount(destroyCount) {}
-    ~C() override {
-      destroyCount++;
-    }
-    C* clone() const override { return new C(destroyCount); }
-  };
-
-}
-
-using namespace box_test;
-
-static_assert(!IsPlainReference<int>::value, "");
-static_assert(IsPlainReference<int&>::value, "");
-static_assert(!IsPlainReference<int&&>::value, "");
-static_assert(!IsPlainReference<A>::value, "");
-static_assert(IsPlainReference<A&>::value, "");
-static_assert(!IsPlainReference<A&&>::value, "");
-
-TEST(BoxTest, CanCreateRef) {
-  Box<int> i(1);
+TEST(BoxTest, CanAssignToReference) {
+  zen::Box<int> i(1);
   i.reference() = 2;
   ASSERT_EQ(i.value(), 2);
 }
 
-TEST(BoxTest, CanHoldPoly) {
-  Box<B> b(B {});
-  ASSERT_EQ(b.reference().someData, 43);
-  ASSERT_EQ(b.reference().someData, 43);
+TEST(BoxTest, CanMoveCastObject) {
+  zen::Box<float> f(1);
+  zen::Box<int> i(std::move(f));
+  ASSERT_EQ(i.value(), 1);
 }
 
-TEST(BoxTest, CanAssignPolyBase) {
-  Box<B> b(B {});
-  Box<A> a(b);
-  A& aRef = a.reference();
-  ASSERT_EQ(static_cast<B&>(aRef).someData, 43);
+TEST(BoxTest, CanCastObject) {
+  zen::Box<float> f(1);
+  zen::Box<int> i(f);
+  ASSERT_EQ(f.value(), (float)1.0);
+}
+
+TEST(BoxTest, CanInstantiateDerived) {
+  zen::Box<A> c(C {});
+  ASSERT_EQ(static_cast<C&>(c.reference()).someData, 32);
+}
+
+TEST(BoxTest, CanMoveDerivedToBase) {
+  zen::Box<C> c(C {});
+  zen::Box<A> a(std::move(c));
+  ASSERT_EQ(static_cast<C&>(a.reference()).someData, 32);
+}
+
+TEST(BoxTest, CanCopyDerivedToBase) {
+  zen::Box<C> c(C {});
+  zen::Box<A> a(c);
+  ASSERT_EQ(static_cast<C&>(a.reference()).someData, 32);
 }
 
 TEST(BoxTest, CallsPolyDestructor) { 
   int destroyCount = 0;
   {
-    Box<C> c(C { destroyCount });
+    zen::Box<B> b(B { destroyCount });
   }
-  // we did one copy, so it should be destroyed twice
-  ASSERT_EQ(destroyCount, 2);
+  ASSERT_GT(destroyCount, 0);
+}
+
+TEST(BoxTest, CanCreateRefFromDerived) {
+  C c1;
+  zen::Box<A&> boxed1(c1);
+  ASSERT_EQ(static_cast<C&>(boxed1.reference()).someData, 32);
+
+  C c2;
+  const zen::Box<A&> boxed2(c2);
+  ASSERT_EQ(static_cast<const C&>(boxed2.reference()).someData, 32);
+}
+
+TEST(BoxTest, CanCopyRefBox) {
+  C c1;
+  zen::Box<A&> boxed1(c1);
+  zen::Box<C&> boxed2(boxed1);
+  ASSERT_EQ(boxed2.reference().someData, 32);
 }
 

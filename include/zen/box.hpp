@@ -48,36 +48,23 @@ namespace zen {
 
     using Type = T;
 
-    // Box(const Box& oth): _value(oth._value) {}
+    Box(const Box& oth): _value(oth._value) {}
 
-    // Box(Box&& oth): _value(std::move(oth._value)) {}
+    Box(Box&& oth): _value(std::move(oth._value)) {}
 
-    template<typename R>
-    Box(R value): Box(typename box_detail::GetTag<R>::type {}, value) {}
-
-    template<typename R>
-    Box(box_detail::BoxMoveTag, R oth): _value(std::move(oth._value())) {}
+    template<typename R, typename = typename std::enable_if<std::is_convertible<R, T>::value>::type>
+    Box(R value): _value(value) {}
 
     template<typename R>
-    Box(box_detail::PlainBoxTag, R oth): _value(oth._value) {}
+    Box(Box<R>&& oth): _value(std::move(oth._value)) {}
 
     template<typename R>
-    Box(box_detail::ConstBoxRefTag, R oth): _value(oth._value) {}
+    Box(const Box<R>& oth): _value(oth._value) {}
 
-    template<typename R>
-    Box(box_detail::PlainValueTag, R val): _value(val) {}
+    T value() const { return _value; }
 
-    T value() const {
-      return _value;
-    }
-
-    T& reference() {
-      return _value;
-    }
-
-    const T& reference() const {
-      return _value;
-    }
+    T& reference() { return _value; }
+    const T& reference() const { return _value; }
 
   };
 
@@ -101,7 +88,7 @@ namespace zen {
       printf("Moving Box (%p => %p)", &oth, this);
     }
 
-    template<typename R, typename = typename std::enable_if<std::is_convertible<R, T>::value>::type>
+    template<typename R, typename = typename std::enable_if<std::is_convertible<R&, T&>::value>::type>
     Box(R val): ptr(clone(val)) {
       printf("Creating Box (%p)\n", this);
     };
@@ -133,7 +120,6 @@ namespace zen {
     const T& reference() const { return *ptr; }
 
     ~Box() {
-      printf("~Box (%p)\n", ptr);
       if (ptr != nullptr) {
         delete ptr;
       }
@@ -149,31 +135,33 @@ namespace zen {
 
   protected:
 
+    template<typename R, typename Enabler>
+    friend class Box;
+
     using PtrT = ValueT*;
 
-    PtrT ptr;
+    PtrT _ptr;
 
   public:
 
     using Type = T;
 
-    Box(const Box& oth): ptr(oth.ptr) { }
+    Box(const Box& oth): _ptr(oth._ptr) { }
 
-    Box(Box&& oth): ptr(std::move(oth.ptr)) {};
+    Box(Box&& oth): _ptr(std::move(oth._ptr)) {};
 
-    Box(T ref): ptr(&ref) {}
+    Box(T ref): _ptr(&ref) {}
 
-    operator T() {
-      return *ptr;
-    }
+    template<typename R>
+    Box(Box<R>&& oth): _ptr(std::move(static_cast<ValueT*>(oth._ptr))) {}
 
-    T value() const {
-      return *ptr;
-    }
+    template<typename R>
+    Box(const Box<R>& oth): _ptr(static_cast<ValueT*>(oth._ptr)) {}
 
-    T reference() {
-      return *ptr;
-    }
+    ValueT value() const { return *_ptr; }
+
+    typename std::add_lvalue_reference<ValueT>::type reference() { return *_ptr; }
+    typename std::add_lvalue_reference<typename std::add_const<ValueT>::type>::type reference() const { return *_ptr; }
 
   };
 
