@@ -1,28 +1,40 @@
 
+genrule(
+    name = "tests_dsym",
+    srcs = [":tests"],
+    outs = ["tests.dSYM"],
+    output_to_bindir = True,
+    cmd = "dsymutil $(location :tests) -o $@",
+    testonly = True,
+)
+
 cc_library(
   name = "lib",
-  hdrs = ["include/zen/box.hpp", "include/zen/either.hpp", "include/zen/config.hpp"],
+  hdrs = ["include/zen/value_ptr.hpp", "include/zen/clone.hpp", "include/zen/maybe.hpp", "include/zen/box.hpp", "include/zen/either.hpp", "include/zen/config.hpp"],
   includes = ["include"],
   copts = ['-std=c++17'],
 )
 
 cc_test(
   name = "tests",
-  srcs = glob(["test/*.cc"]),
+  includes = ["test"],
+  srcs = glob(["test/util.hpp", "test/*.cc"]),
   deps = [":lib", "@googletest//:gtest_main"],
   copts = ['-std=c++17'],
 )
 
 cc_test(
   name = "tests_noexcept",
-  srcs = glob(["test/*.cc"]),
+  includes = ["test"],
+  srcs = glob(["test/util.hpp", "test/*.cc"]),
   deps = [":lib", "@googletest//:gtest_main"],
   copts = ["-std=c++17", "-fno-exceptions"]
 )
 
 cc_test(
   name = "tests_nortti",
-  srcs = glob(["test/*.cc"]),
+  includes = ["test"],
+  srcs = glob(["test/util.hpp", "test/*.cc"]),
   deps = [":lib", "@googletest//:gtest_main"],
   copts = ["-std=c++17", "-fno-rtti"]
 )

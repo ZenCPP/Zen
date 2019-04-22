@@ -2,117 +2,135 @@
 #define ZEN_EITHER_HPP
 
 #include <memory>
-#include <cstring>
+#include <cstdlib>
 #include <type_traits>
+#include <exception>
 
 #include "zen/config.hpp"
+#include "zen/box.hpp"
+#include "zen/maybe.hpp"
 
 namespace zen {
 
-  template<typename T>
-  struct Value {
-    T value;
-    Value(T val): value(val) {};
-  };
+  // template<typename T> struct Left  : public Box<T> { };
+  // template<typename T> struct Right : public Box<T> { };
 
-  template<typename T> 
-  struct Left  : public Value<T> {
-    Left(T val): Value<T>(val) {}
-  };
-
-  template<typename T> 
-  struct Right : public Value<T> {
-    Right(T val): Value<T>(val) {}
-  };
+  ZEN_DEFINE_BOXED_TYPE(Left);
+  ZEN_DEFINE_BOXED_TYPE(Right);
 
   template<typename T> Left<T> left(T val) { return { val }; }
   template<typename T> Right<T> right(T val) { return { val }; }
 
-  /// A box allows stack-allocated objects to be passed around
-  /// as a supertype without loss of information.
-  template<typename T>
-  class Box {
-
-    void* buf;
-
-  public:
-
-    template<typename R>
-    Box(R val): buf(std::malloc(sizeof(R))) {
-      std::memcpy(buf, reinterpret_cast<char*>(&val), sizeof(T));
-    }
-
-    operator T&() {
-      return value();
-    }
-
-    T& value() {
-      return *reinterpret_cast<T*>(buf);
-    }
-
-    const T& value() const {
-      return *reinterpret_cast<T*>(buf);
-    }
-
-    ~Box() {
-      reinterpret_cast<T*>(buf)->~T();
-      delete buf;
-    }
-
-  };
-
   template<typename L, typename R>
   class Either {
 
-    template<typename T>
-    using StorageT = typename std::conditional<std::is_polymorphic<T>::value, Box<T>, T>::type;
+    union {
+      Box<L> _left;
+      Box<R> _right;
+    };
 
-    using StorageL = StorageT<L>;
-    using StorageR = StorageT<R>;
-
-    union Value {
-
-      StorageT<L> left;
-      StorageT<R> right;
-
-      template<typename LT>
-      Value(Left<LT> left): left(left.value) {}
-
-      template<typename RT>
-      Value(Right<RT> right): right(right.value) {}
-
-      ~Value() {}
-
-    } value;
-
-    bool isLeft;
+    bool _isLeft;
 
   public:
 
+    using LeftT = L;
+    using RightT = R;
+
     template<typename LT>
-    Either(Left<LT> left): isLeft(true), value(left) {}
+    Either(Left<LT> left): _isLeft(true), _left(left.value) {}
 
     template<typename RT>
-    Either(Right<RT> right): isLeft(true), value(right) {}
+    Either(Right<RT> right): _isLeft(false), _right(right.value) {}
+
+    Either(const Either<L, R>& oth): _isLeft(oth._isLeft) {
+      if (_isLeft) {
+        _left = oth._left;
+      } else {
+        _right = oth._right;
+      }
+    }
+
+    Either(Either<L, R>&& oth): _isLeft(oth._isLeft) {
+      if (_isLeft) {
+        _left = std::move(oth._left);
+      } else {
+        _right = std::move(oth._right);
+      }
+    }
 
 #if ZEN_EXCEPTIONS_ENABLED
-    void unwrap() {
-      if (isLeft) {
-        throw value.left;
+    R unwrap() {
+      if (_isLeft) {
+        throw _left;
       }
+      return _right;
     }
 #endif
 
+//     L getLeft() { 
+// #ifndef NDEBUG
+//       assert(_isLeft);
+// #endif
+//       return _left; 
+//     }
+// 
+//     L getRight() { 
+// #ifndef NDEBUG
+//       assert(_isLeft);
+// #endif
+//       return _right;
+//     }
+
+    static Either<L, R> fromLeft(L left) {
+      return Left<L>(left);
+    }
+
+    static Either<L, R> fromRight(R right) {
+      return Right<R>(right);
+    }
+
+    Maybe<L> left() const { 
+      if (!_isLeft)
+        return {};
+      return Some<L>(_left);
+    }
+
+    Maybe<R> right() const { 
+      if (_isLeft)
+        return {};
+      return Some<R>(_right);
+    }
+
+    template<typename F>
+    Either<typename std::invoke_result<F,L>::type, R> mapLeft(F const& f) {
+      using Mapped = Either<typename std::invoke_result<F,L>::type, R>;
+      return _isLeft ? Mapped::fromLeft(f(_left.value())) : Mapped::fromRight(_right.value());
+    }
+
+    template<typename F>
+    Either<L, typename std::invoke_result<F,R>::type> mapRight(F const& f) {
+      using Mapped = Either<L, typename std::invoke_result<F,R>::type>;
+      return _isLeft ? Mapped::fromLeft(_left.value()) : Mapped::fromRight(f(_right.value()));
+    }
+
+    inline bool isRight() const { return !_isLeft; }
+    inline bool isLeft() const { return _isLeft; }
+
     ~Either() {
-      if (isLeft) {
-        value.left.~StorageL();
+      printf("~Either\n");
+      if (_isLeft) {
+        _left.~Box<L>();
       } else {
-        value.right.~StorageR();
+        _right.~Box<R>();
       }
     }
 
   };
+
+  template<typename T>
+  using Result = Either<std::exception, T>;
 
 }
 
 #endif // ZEN_EITHER_HPP
+

@@ -67,10 +67,10 @@ Construct an `Either`-object with its right-hand-side initialized to the given v
 ## License
 
 This library is licensed under the very permissive MIT license, in the hope
-that it will be usefull to other developers. Giving credit to the developers
+that it will be useful to other developers. Giving credit to the developers
 behind it is always much appreciated.
 
-    Copyright <YEAR> <COPYRIGHT HOLDER>
+    Copyright 2019 Sam Vervaeck
 
     Permission is hereby granted, free of charge, to any person obtaining a
     copy of this software and associated documentation files (the "Software"),

@@ -2,50 +2,45 @@
 #include <gtest/gtest.h>
 
 #include "zen/either.hpp"
-
-using namespace zen;
+#include "util.hpp"
 
 TEST(EitherTest, CanMakeLeftRight) {
-  Either<int, float> e1 = left(1);
-  Either<int, float> e2 = right(1.0);
-}
-
-class A {
-public:
-  virtual ~A() = 0;
-};
-
-class B {
-  bool& destroyed;
-public:
-  B(bool& destroyed): destroyed(destroyed) {}
-  virtual ~B() { 
-    destroyed = true;
-  }
-};
-
-Either<B, int> makeLeftB(bool& destroyed){
-  return left(B(destroyed));
-}
-
-Either<int, B> makeRightB(bool& destroyed){
-  return right(B(destroyed));
+  zen::Either<int, float> e1 = zen::left(1);
+  zen::Either<int, float> e2 = zen::right(1.0);
 }
 
 TEST(EitherTest, CallsDestructor) {
-  bool destroyedRight, destroyedLeft;
+  int leftDestrCnt = 0, rightDestrCnt = 0;
   {
-    auto b1 = makeLeftB(destroyedLeft);
+    zen::left(B(leftDestrCnt));
   }
   {
-    auto b2 = makeRightB(destroyedRight);
+    zen::right(B(rightDestrCnt));
   }
-  ASSERT_TRUE(destroyedLeft);
-  ASSERT_TRUE(destroyedRight);
+  ASSERT_GT(leftDestrCnt, 0);
+  ASSERT_GT(rightDestrCnt, 0);
+}
+
+TEST(EitherTest, RetainsEntirePolyDuringCopy) {
+  zen::Either<int, A> e1 = zen::right(C {});
+  printf("getting right()\n");
+  e1.right();
+  printf("Destroying\n");
+  // ASSERT_EQ(static_cast<C&>(a1.get()).someData, 0x34);
+  // zen::Either<A, int> e2 = zen::left(C {});
+  // auto a2 = e2.left();
+  // ASSERT_EQ(static_cast<C&>(a2.get()).someData, 0x34);
 }
 
 TEST(EitherTest, CanLeftMap) {
-  
+  zen::Either<int, float> e1 = zen::left(1);
+  int res = e1.mapLeft([](int val) { return val + 1; }).left().orElse(3);
+  ASSERT_EQ(res, 2);
+}
 
+TEST(EitherTest, CanRightMap) {
+  zen::Either<int, float> e1 = zen::right(1);
+  int res = e1.mapRight([](int val) { return val + 1; }).right().orElse(3);
+  ASSERT_EQ(res, 2);
 }
 
