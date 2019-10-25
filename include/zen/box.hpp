@@ -80,28 +80,18 @@ namespace zen {
 
     using Type = T;
 
-    Box(const Box& oth): ptr(clone(*oth.ptr)) {
-      printf("Copying Box (%p => %p)\n", &oth, this);
-    }
+    Box(const Box& oth): ptr(clone(*oth.ptr)) {}
 
-    Box(Box&& oth): ptr(std::exchange(oth.ptr, nullptr)) {
-      printf("Moving Box (%p => %p)", &oth, this);
-    }
+    Box(Box&& oth): ptr(std::exchange(oth.ptr, nullptr)) {}
 
     template<typename R, typename = typename std::enable_if<std::is_convertible<R&, T&>::value>::type>
-    Box(R val): ptr(clone(val)) {
-      printf("Creating Box (%p)\n", this);
-    };
+    Box(R val): ptr(clone(val)) { };
 
     template<typename R>
-    Box(const Box<R>& oth): ptr(clone(*oth.ptr)) {
-      printf("Copying Box (%p => %p)\n", &oth, this);
-    }
+    Box(const Box<R>& oth): ptr(clone(*oth.ptr)) { }
 
     template<typename R>
-    Box(Box<R>&& oth): ptr(std::exchange(oth.ptr, nullptr)) {
-      printf("Moving Box (%p => %p)", &oth, this);
-    };
+    Box(Box<R>&& oth): ptr(std::exchange(oth.ptr, nullptr)) { };
 
 //       template<typename R>
 //       R as() const {
@@ -173,9 +163,8 @@ namespace zen {
     Box<T> value; \
     name(const Box<T>& val): value(val) {} \
     name(T val): value(val) {} \
-    ~name() { printf("~" #name "\n"); } \
   };
 
 } // namespace zen
 
-#endif // ZEN_BOX_HPP
+#endif // #ifnfdef ZEN_BOX_HPP

@@ -117,7 +117,6 @@ namespace zen {
     inline bool isLeft() const { return _isLeft; }
 
     ~Either() {
-      printf("~Either\n");
       if (_isLeft) {
         _left.~Box<L>();
       } else {

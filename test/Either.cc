@@ -23,9 +23,7 @@ TEST(EitherTest, CallsDestructor) {
 
 TEST(EitherTest, RetainsEntirePolyDuringCopy) {
   zen::Either<int, A> e1 = zen::right(C {});
-  printf("getting right()\n");
   e1.right();
-  printf("Destroying\n");
   // ASSERT_EQ(static_cast<C&>(a1.get()).someData, 0x34);
   // zen::Either<A, int> e2 = zen::left(C {});
   // auto a2 = e2.left();
