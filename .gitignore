@@ -1,0 +1,6 @@
+
+# default build directory
+/build/
+
+# local development files
+Makefile
