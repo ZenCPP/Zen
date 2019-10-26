@@ -1,27 +1,120 @@
-Zen Base Libraries
-==================
+Zen C++ Libraries
+=================
 
-This is a set of headers that you can freely use in your own projects. It
-contains some classes and utilities that are widely used in the other Zen C++
-libraries.
+The Zen C++ libraries are a set of C++ headers that you can freely use in your
+own projects. The libraries try to fill missing pieces in the existing C++
+ecosystem, based on ideas taken from Haskell and Rust.
 
-## Installation
+🧪 These headers are experimental and currently require a modern compiler
+supporting a modern C++ standard.
 
-Currently, we recommend using the [Bazel build tool](https://bazel.build) for
-both fast and secure builds.
+## Examples
 
-Add the following to your `WORKSPACE`-file, usually located in the directory 
-containing all of your related projects:
+Say we have the following types defined:
+
+```cpp
+class Shape {
+
+  virtual ~Shape() {};
+
+  // ...
+
+};
+
+class Rect : public Shape {
+
+  Rect(std::size_t width, std::size_t height);
+
+  ~Shape() {  }
+
+   // ...
+
+};
+
+class Triangle : public Shape {
+
+  Triangle(std::size_t side1, std::size_t side2, std::size_t side3);
+
+  ~Triangle() {  }
+
+  // ...
+
+};
+```
+
+The `zen::ValuePtr`-type allows you to pass arbitrary values between different functions by-value.
+
+```cpp
+zen::ValuePtr<Shape> my_shape = zen::make_value_ptr<Rect>(4, 6);
+```
+
+The pattern matching facilities allow you to very efficiently check the kind of object you're holding:
+
+```cpp
+Match (*my_shape) {
+  Case (C<Rect>()) {
+    std::cerr << "I am holding a rectangle!" << std::endl;
+    break;
+  }
+  Case (C<Triangle>()) {
+    std::cerr << "I am holding a triangle!" << std::endl;
+    break;
+  }
+}
+```
+
+Using the `zen::Either`-type, we can safely express computations that can fail:
+
+```cpp
+enum class MyError {
+  SomeCheckHasFailed,
+}
+
+template<typename T>
+using MyResult = zen::Either<MyError, T>;
+
+MyResult<int> computation_that_may_fail() {
+  if (some_check_that_may_fail) {
+    return zen::left(MyError::SomeCheckHasFailed);
+  }
+  return zen::right(42);
+}
+```
+
+Combining these facilities, we can write some very powerful code:
+
+```cpp
+MyResult<zen::ValuePtr<Shape>> another_computation_that_may_fail() {
+  Match (computation_that_may_fail()) {
+    Case (C<zen::Left>(error))
+      return zen::make_left(error);
+    Case (C<zen::Right>(result)) {
+      return zen::make_right(zen::make_value_ptr<Rect>(result, result * 2));
+    }
+  }
+}
 
 ```
-git_repository(
-    name = "zen_base",
-    remote = "https://github.com/ZenCPP/base",
-    tag = "v0.0.1",
-)
-```
 
-## Usage
+## Installation and Usage 
+
+Currently, the preferred method for using these libraries is by downloading a
+release tarball and checking in the sources into your project (e.g. in a folder
+called `third_party/zen`).
+
+## Coding standard
+
+We try to adhere to the [C++ Core Guidelines][1], which are recommended by the
+Standard C++ Foundation. As a rule of thumb, we use the following conventions:
+
+ - Functions are written in snake-case.
+ - Library types have their first letter capitalised to distinguish them from
+   the standard library types.
+ - Indentation is consistently 2 spaces over the entire code base.
+
+[1]: https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines
+
+## API Reference
 
 ### zen::Either<L, K>
 
@@ -39,16 +132,13 @@ exception handling. This is recommended for a few reasons:
  - Because the exception type is encoded in the type, some bugs can be captured at
    compile-time.
 
-Internally, the `Either`-object will try to allocate on the stack as much as possbile,
-falling back on the heap for objects that might have different layouts at runtime.
-
-```
-Either<std::string, int> sendNotification(std::string msg) {
+```cpp
+zen::Either<std::string, int> send_notification(std::string msg) {
   // ...
   if (status == E_QUEUE_FULL) {
-    return left("Could not send message: the queue is full.")
+    return zen::left("Could not send message: the queue is full.")
   }
-  return right(notificationId)
+  return right(...)
 }
 ```
 
@@ -70,23 +160,7 @@ This library is licensed under the very permissive MIT license, in the hope
 that it will be useful to other developers. Giving credit to the developers
 behind it is always much appreciated.
 
-    Copyright 2019 Sam Vervaeck
+See [the LICENSE file][1] for more information.
 
-    Permission is hereby granted, free of charge, to any person obtaining a
-    copy of this software and associated documentation files (the "Software"),
-    to deal in the Software without restriction, including without limitation
-    the rights to use, copy, modify, merge, publish, distribute, sublicense,
-    and/or sell copies of the Software, and to permit persons to whom the
-    Software is furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-    DEALINGS IN THE SOFTWARE.
+[2]: https://github.com/ZenCPP/ZenCPP/blob/master/LICENSE
 
