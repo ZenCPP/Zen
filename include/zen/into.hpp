@@ -14,7 +14,7 @@ namespace zen {
   };
 
   template<typename T>
-  struct IntoPtrType : IntoType<T, typename std::enable_if<std::is_pointer_v<T>>::type> { 
+  struct IntoPtrType : IntoType<T, typename std::enable_if<std::is_pointer<T>::value>::type> { 
     template<typename R>
     static R apply(T value) {
       return std::static_pointer_cast<R>(value);
