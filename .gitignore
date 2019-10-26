@@ -7,3 +7,4 @@
 
 # local development files
 Makefile
+compile_commands.json
