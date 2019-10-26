@@ -1,135 +1,140 @@
 #ifndef ZEN_EITHER_HPP
 #define ZEN_EITHER_HPP
 
-#include <memory>
-#include <cstdlib>
 #include <type_traits>
-#include <exception>
+#include <utility>
 
-#include "zen/config.hpp"
-#include "zen/box.hpp"
-#include "zen/maybe.hpp"
+#include "zen/config.h"
+#include "zen/into.hpp"
 
 namespace zen {
 
-  // template<typename T> struct Left  : public Box<T> { };
-  // template<typename T> struct Right : public Box<T> { };
+  template<typename L, typename R>
+  class Either;
 
-  ZEN_DEFINE_BOXED_TYPE(Left);
-  ZEN_DEFINE_BOXED_TYPE(Right);
+#define EDEN_DEFINE_EITHER_TAG(name)                        \
+  template<typename T>                                      \
+  class name {                                              \
+    template<typename L1, typename R1> friend class Either; \
+    T value;                                                \
+  public:                                                   \
+    inline name(T value): value(value) {};                  \
+  };
 
-  template<typename T> Left<T> left(T val) { return { val }; }
-  template<typename T> Right<T> right(T val) { return { val }; }
+  EDEN_DEFINE_EITHER_TAG(LeftT)
+  EDEN_DEFINE_EITHER_TAG(RightT)
 
   template<typename L, typename R>
   class Either {
-
-    union {
-      Box<L> _left;
-      Box<R> _right;
-    };
-
-    bool _isLeft;
-
   public:
 
-    using LeftT = L;
-    using RightT = R;
+    enum class Direction {
+      Left,
+      Right,
+    };
 
-    template<typename LT>
-    Either(Left<LT> left): _isLeft(true), _left(left.value) {}
+    union DataT {
 
-    template<typename RT>
-    Either(Right<RT> right): _isLeft(false), _right(right.value) {}
+      L left;
+      R right;
 
-    Either(const Either<L, R>& oth): _isLeft(oth._isLeft) {
-      if (_isLeft) {
-        _left = oth._left;
-      } else {
-        _right = oth._right;
+      DataT(LeftT<L> left): left(left.value) {};
+      DataT(RightT<R> right): right(right.value) {};
+
+      ~DataT() {}
+
+    };
+
+    Direction dir;
+    DataT data;
+
+    template<typename L1>
+    Either(LeftT<L1> left): dir(Direction::Left), data(LeftT<L>(IntoType<L1>::template apply<L>(left.value))) {};
+
+    template<typename R1>
+    Either(RightT<R1> right): dir(Direction::Right), data(RightT<R>(IntoType<R1>::template apply<R>(right.value))) {};
+
+    Either(const Either<L, R>& other): dir(other.dir) {
+      switch (other.dir) {
+        case Direction::Left:
+          data.left = other.data.left;
+          break;
+        case Direction::Right:
+          data.right = other.data.right;
+          break;
       }
     }
 
-    Either(Either<L, R>&& oth): _isLeft(oth._isLeft) {
-      if (_isLeft) {
-        _left = std::move(oth._left);
-      } else {
-        _right = std::move(oth._right);
+    Either(Either<L, R>&& other): dir(std::move(other.dir)) {
+      switch (other.dir) {
+        case Direction::Left:
+          data.left = std::move(other.data.left);
+          break;
+        case Direction::Right:
+          data.right = std::move(other.data.right);
+          break;
       }
     }
 
-#if ZEN_EXCEPTIONS_ENABLED
+    bool is_left() {
+      return dir == Direction::Left;
+    }
+
+    bool is_right() {
+      return dir == Direction::Right;
+    }
+
+    L unwrap_left() {
+      ZEN_ASSERT(dir == Direction::Left);
+      return data.left;
+    }
+
+    R unwrap_right() {
+      ZEN_ASSERT(dir == Direction::Right);
+      return data.right;
+    }
+
+    R operator*() {
+      return unwrap();
+    }
+
     R unwrap() {
-      if (_isLeft) {
-        throw _left;
-      }
-      return _right;
+      ZEN_ASSERT(dir == Direction::Right);
+      return data.right;
     }
-#endif
-
-//     L getLeft() { 
-// #ifndef NDEBUG
-//       assert(_isLeft);
-// #endif
-//       return _left; 
-//     }
-// 
-//     L getRight() { 
-// #ifndef NDEBUG
-//       assert(_isLeft);
-// #endif
-//       return _right;
-//     }
-
-    static Either<L, R> fromLeft(L left) {
-      return Left<L>(left);
-    }
-
-    static Either<L, R> fromRight(R right) {
-      return Right<R>(right);
-    }
-
-    Maybe<L> left() const { 
-      if (!_isLeft)
-        return {};
-      return Some<L>(_left);
-    }
-
-    Maybe<R> right() const { 
-      if (_isLeft)
-        return {};
-      return Some<R>(_right);
-    }
-
-    template<typename F>
-    Either<typename std::invoke_result<F,L>::type, R> mapLeft(F const& f) {
-      using Mapped = Either<typename std::invoke_result<F,L>::type, R>;
-      return _isLeft ? Mapped::fromLeft(f(_left.value())) : Mapped::fromRight(_right.value());
-    }
-
-    template<typename F>
-    Either<L, typename std::invoke_result<F,R>::type> mapRight(F const& f) {
-      using Mapped = Either<L, typename std::invoke_result<F,R>::type>;
-      return _isLeft ? Mapped::fromLeft(_left.value()) : Mapped::fromRight(f(_right.value()));
-    }
-
-    inline bool isRight() const { return !_isLeft; }
-    inline bool isLeft() const { return _isLeft; }
 
     ~Either() {
-      if (_isLeft) {
-        _left.~Box<L>();
-      } else {
-        _right.~Box<R>();
+      switch (dir) {
+        case Direction::Left:
+          data.left.~L();
+          break;
+        case Direction::Right:
+          data.right.~R();
+          break;
       }
     }
 
   };
 
-  template<typename T>
-  using Result = Either<std::exception, T>;
+  template<typename L>
+  LeftT<L> make_left(L value) {
+    return LeftT(value);
+  }
 
-}
+  template<typename R>
+  RightT<R> make_right(R value) {
+    return RightT(value);
+  }
 
-#endif // ZEN_EITHER_HPP
+#define EDEN_TRY(name, expr)       \
+    auto name = expr;              \
+    if (name.isLeft()) {           \
+      return left(name.getLeft()); \
+    }
 
+  struct Left {};
+  struct Right {};
+
+} // of namespace zen
+
+#endif // #ifndef ZEN_EITHER_HPP
