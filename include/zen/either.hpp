@@ -51,10 +51,10 @@ namespace zen {
     DataT data;
 
     template<typename L1>
-    Either(LeftT<L1> left): dir(Direction::Left), data(LeftT<L>(IntoType<L1>::template apply<L>(left.value))) {};
+    Either(LeftT<L1> left): dir(Direction::Left), data(LeftT<L>(into<L>(left.value))) {};
 
     template<typename R1>
-    Either(RightT<R1> right): dir(Direction::Right), data(RightT<R>(IntoType<R1>::template apply<R>(right.value))) {};
+    Either(RightT<R1> right): dir(Direction::Right), data(RightT<R>(into<R>(right.value))) {};
 
     Either(const Either<L, R>& other): dir(other.dir) {
       switch (other.dir) {

@@ -6,7 +6,7 @@
 namespace zen {
 
   template<typename T, typename Enabler = void>
-  struct IntoType {
+  struct Into {
     template<typename R>
     static R apply(T value) {
       return value;
@@ -14,12 +14,17 @@ namespace zen {
   };
 
   template<typename T>
-  struct IntoPtrType : IntoType<T, typename std::enable_if<std::is_pointer<T>::value>::type> { 
+  struct IntoPtr : Into<T, typename std::enable_if<std::is_pointer<T>::value>::type> { 
     template<typename R>
     static R apply(T value) {
       return std::static_pointer_cast<R>(value);
     }
   };
+
+  template<typename R, typename T>
+  R into(T value) {
+    return Into<T>::template apply<R>(value);
+  }
 
 } // of namespace zen
 
