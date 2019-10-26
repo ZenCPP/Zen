@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(ZenCPP CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 option(ZEN_ENABLE_TESTS OFF "Whether to generate the test infrastructure")
 
@@ -17,7 +17,7 @@ include_directories(include/)
 
 if (ZEN_ENABLE_TESTS)
 
-  file(GLOB_RECURSE test_files test/*.cc)
+  file(GLOB_RECURSE test_files test/*.cpp)
   add_executable(runTests ${test_files})
   target_link_libraries(runTests gtest gtest_main)
 

@@ -38,6 +38,8 @@ namespace zen {
       L left;
       R right;
 
+      DataT() {};
+
       DataT(LeftT<L> left): left(left.value) {};
       DataT(RightT<R> right): right(right.value) {};
 
@@ -118,12 +120,12 @@ namespace zen {
 
   template<typename L>
   LeftT<L> make_left(L value) {
-    return LeftT(value);
+    return LeftT<L>(value);
   }
 
   template<typename R>
   RightT<R> make_right(R value) {
-    return RightT(value);
+    return RightT<R>(value);
   }
 
 #define EDEN_TRY(name, expr)       \
