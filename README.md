@@ -1,6 +1,8 @@
 Zen C++ Libraries
 =================
 
+<img src="https://raw.githubusercontent.com/ZenCPP/ZenCPP/master/zen-logo.png" height="250" />
+
 The Zen C++ libraries are a set of C++ headers that you can freely use in your
 own projects. The libraries try to fill missing pieces in the existing C++
 ecosystem, based on ideas taken from Haskell and Rust.
