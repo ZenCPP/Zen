@@ -1,4 +1,7 @@
 
+# subprojects that might be nested in this directory
+/doxygen-theme/
+
 # default build directory
 /build/
 
@@ -6,5 +9,5 @@
 .clangd/
 
 # local development files
-Makefile
 compile_commands.json
+
