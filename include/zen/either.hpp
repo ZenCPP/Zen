@@ -6,12 +6,12 @@
 /// Often, you find yourself interfacing with external systems, such as a network
 /// service or the file system. Doing operations on these objects can result in
 /// failures, e.g. an `ENOENT` returned from a call to `stat()`.
-/// 
+///
 /// In C, it is very common to store the actual result in one of the function's
 /// parameters and return an error code, like so:
-/// 
+///
 /// ```c
-/// int read_some(const char* filename, char* output) { 
+/// int read_some(const char* filename, char* output) {
 ///   int fd, error;
 ///   fd = open(in, O_RDONLY);
 ///   if (fd < 0) {
@@ -24,16 +24,16 @@
 ///   return 0;
 /// }
 /// ```
-/// 
+///
 /// In C++ another common idiom is returning a `nullptr` whenever a heap-allocated
 /// object could not be created. These approaches have obvious drawbacks. In the
 /// case of returning an error code instead of the result, we have to make sure our
 /// variable can be kept as a reference, leading to more code.
-/// 
+///
 /// The generic solution to this problem is to introduce a new type, called
 /// `Either`, that can hold both a result and an error code, without wasting
 /// precious memory. This is exactly what `zen::Either<L, R>` was made for.
-/// 
+///
 /// ```cpp
 /// Either<int, std::string> writeSome(std::string filename) {
 ///   int fd = open(in, O_RDONLY);
@@ -45,17 +45,17 @@
 ///   return zen::right(std::string(output, 4));
 /// }
 /// ```
-/// 
+///
 /// We can further improve upon our code snippet by declaring an `enum` that lists
 /// all possible errors that might occur. The errors might even be full classes
 /// using virtual inheritance; something which we'll see later on.
-/// 
+///
 /// ```cpp
 /// enum class Error {
 ///   OpenFailed,
 ///   ReadFailed,
 /// }
-/// 
+///
 /// Either<int, std::string> writeSome(std::string filename) {
 ///   int fd = open(in, O_RDONLY);
 ///   if (fd < 0) {
@@ -68,172 +68,222 @@
 ///   return zen::right(std::string(output, 4));
 /// }
 /// ```
-/// 
+///
 /// Finally, we encapsulate our error type in a custom `Result`-type that will be
 /// used thoughout our application:
-/// 
+///
 /// ```cpp
 /// template<typename T>
 /// using Result = Either<Error, T>;
 /// ```
-/// 
+///
 /// That's it! You've learned how to write simple C++ code the Zen way!
 
 #ifndef ZEN_EITHER_HPP
 #define ZEN_EITHER_HPP
 
-#include <type_traits>
-#include <utility>
-
-#include "zen/config.h"
-#include "zen/into.hpp"
+#include "zen/macros.h"
 
 namespace zen {
 
-  /// The base type for returning results that might contain an error
-  /// object.
-  ///
-  /// The type holds the following union:
-  /// ```
-  /// union {
-  ///   L left;
-  ///   R right;
-  /// }
-  /// ```
-  ///
-  /// This makes sure as little memory as possible is used.kept
-  ///
-  /// \see zen/either.hpp for an introduction
-  template<typename L, typename R>
-  class Either;
-
-#define EDEN_DEFINE_EITHER_TAG(name)                        \
-  template<typename T>                                      \
-  class name {                                              \
-    template<typename L1, typename R1> friend class Either; \
-    T value;                                                \
-  public:                                                   \
-    inline name(T value): value(value) {};                  \
+  template<typename L>
+  struct left_t {
+    L value;
+    inline left_t(L value): value(std::move(value)) {};
   };
 
-  EDEN_DEFINE_EITHER_TAG(LeftT)
-  EDEN_DEFINE_EITHER_TAG(RightT)
+  template<typename R>
+  struct right_t {
+    R value;
+    inline right_t(R&& value): value(std::move(value)) {};
+    inline right_t(const R& value): value(value) {};
+  };
+
+  template<>
+  struct right_t<void> {};
 
   template<typename L, typename R>
-  class Either {
-  private:
+  class either {
 
-    enum class Direction {
-      Left,
-      Right,
+    template<typename L2, typename R2>
+    friend
+    class either;
+
+    struct dummy {
     };
 
-    union DataT {
+    union {
 
-      L left;
-      R right;
-
-      DataT() {};
-
-      DataT(LeftT<L> left): left(left.value) {};
-      DataT(RightT<R> right): right(right.value) {};
-
-      ~DataT() {}
+      L left_value;
+      R right_value;
 
     };
 
-    Direction dir;
-    DataT data;
+    bool has_right_v;
 
   public:
 
-    template<typename L1>
-    Either(LeftT<L1> left): dir(Direction::Left), data(LeftT<L>(into<L>(left.value))) {};
+    template<typename L2>
+    inline either(left_t<L2>&& value): left_value(std::move(value.value)), has_right_v(false) {};
 
-    template<typename R1>
-    Either(RightT<R1> right): dir(Direction::Right), data(RightT<R>(into<R>(right.value))) {};
+    template<typename R2>
+    inline either(right_t<R2>&& value): right_value(std::move(value.value)), has_right_v(true) {};
 
-    Either(const Either<L, R>& other): dir(other.dir) {
-      switch (other.dir) {
-        case Direction::Left:
-          data.left = other.data.left;
-          break;
-        case Direction::Right:
-          data.right = other.data.right;
-          break;
+    either(either &&other) : has_right_v(std::move(other.has_right_v)) {
+      if (has_right_v) {
+        new(&right_value)R(std::move(other.right_value));
+      } else {
+        new(&left_value)L(std::move(other.left_value));
       }
     }
 
-    Either(Either<L, R>&& other): dir(std::move(other.dir)) {
-      switch (other.dir) {
-        case Direction::Left:
-          data.left = std::move(other.data.left);
-          break;
-        case Direction::Right:
-          data.right = std::move(other.data.right);
-          break;
+//    either(const either &other) : has_right_v(other.has_right_v) {
+//      if (has_right_v) {
+//        new(&right_value)R(other.right_value);
+//      } else {
+//        new(&left_value)L(other.left_value);
+//      }
+//    }
+
+    template<typename L2, typename R2>
+    either(either<L2, R2>&& other): has_right_v(std::move(other.has_right_v)) {
+      if (has_right_v) {
+        new(&right_value)R(std::move(other.right_value));
+      } else {
+        new(&left_value)L(std::move(other.left_value));
       }
     }
 
-    bool is_left() {
-      return dir == Direction::Left;
+    template<typename L2, typename R2>
+    either(const either<L2, R2> &other): has_right_v(other.has_right_v) {
+      if (has_right_v) {
+        new(&right_value)R(other.right_value);
+      } else {
+        new(&left_value)L(other.left_value);
+      }
     }
 
-    bool is_right() {
-      return dir == Direction::Right;
+    R* operator->() {
+      ZEN_ASSERT(has_right_v);
+      return &right_value;
     }
 
-    L unwrap_left() {
-      ZEN_ASSERT(dir == Direction::Left);
-      return data.left;
+    R &operator*() {
+      ZEN_ASSERT(has_right_v);
+      return right_value;
     }
 
-    R unwrap_right() {
-      ZEN_ASSERT(dir == Direction::Right);
-      return data.right;
+    bool is_left() { return !has_right_v; }
+
+    bool is_right() { return has_right_v; }
+
+    L &left() {
+      ZEN_ASSERT(!has_right_v);
+      return left_value;
     }
 
-    R operator*() {
-      return unwrap();
+    R &right() {
+      ZEN_ASSERT(has_right_v);
+      return right_value;
     }
 
-    R unwrap() {
-      ZEN_ASSERT(dir == Direction::Right);
-      return data.right;
-    }
-
-    ~Either() {
-      switch (dir) {
-        case Direction::Left:
-          data.left.~L();
-          break;
-        case Direction::Right:
-          data.right.~R();
-          break;
+    ~either() {
+      if (has_right_v) {
+        right_value.~R();
+      } else {
+        left_value.~L();
       }
     }
 
   };
 
   template<typename L>
-  LeftT<L> make_left(L value) {
-    return LeftT<L>(value);
+  class either<L, void> {
+
+    struct dummy {};
+
+    union data_t {
+      L left;
+      dummy right;
+    };
+
+    data_t data;
+
+    bool has_left;
+
+  public:
+
+    inline either(left_t<L> data): data(data.value),  has_left(true) {};
+    inline either(right_t<void>): has_left(false) {};
+
+    either(either&& other): has_left(other.has_left) {
+      if (other.has_left) {
+        data.left = std::move(other.data.left);
+      }
+    }
+
+    either(const either& other): has_left(other.has_left) {
+      if (other.has_left) {
+        data.left = other.data.left;
+      }
+    }
+
+    bool is_left() { return has_left; }
+    bool is_right() { return !has_left; }
+
+    L& left() const {
+      ZEN_ASSERT(has_left);
+      return data.left;
+    }
+
+    ~either() {
+      if (has_left) {
+        data.left.~L();
+      }
+    }
+
+  };
+
+  template<typename L>
+  left_t<L> left(const L& value) {
+    return left_t<L> { value };
+  }
+
+  template<typename L>
+  left_t<L> left(L&& value) {
+    return left_t<L> { std::move(value) };
   }
 
   template<typename R>
-  RightT<R> make_right(R value) {
-    return RightT<R>(value);
+  right_t<R> right(R& value) {
+    return right_t<R> { value };
   }
 
-#define EDEN_TRY(name, expr)       \
-    auto name = expr;              \
-    if (name.isLeft()) {           \
-      return left(name.getLeft()); \
-    }
+  template<typename R>
+  right_t<R> right(R&& value) {
+    return right_t<R> { std::move(value) };
+  }
 
-  struct Left {};
-  struct Right {};
+#define ZEN_TRY(value) \
+  { \
+    if (value.is_left()) { \
+      return ::zen::left(std::move(value.left())); \
+    } \
+  }
+
+#define ZEN_TRY2(expr) \
+  { \
+    auto zen__either__result = (expr); \
+    if (zen__either__result.is_left()) { \
+      return ::zen::left(std::move(zen__either__result.left())); \
+    } \
+  }
+
+#define ZEN_UNWRAP(value) \
+  if (value.is_left()) { \
+    ZEN_PANIC("unwrapping a left-valued object"); \
+  }
 
 } // of namespace zen
 
-#endif // #ifndef ZEN_EITHER_HPP
+#endif // ZEN_EITHER_HPP
