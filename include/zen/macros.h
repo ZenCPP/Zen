@@ -1,13 +1,83 @@
+/// \file macros.h
+/// \brief Generic macros used throughout the Zen C++ libraries.
+/// 
+/// Zen++ comes shipped with some very powerful macros and hacks for
+/// automatically generating code. They have been gathered from several places, and
+/// have been tested to work on the standard list of compilers. These macros should
+/// cover almost all use-cases, and if you're finding yourself missing one, you can
+/// always [open up a pull request][1].
+///
+/// [1]: https://github.com/ZenCPP/ZenCPP/pulls
+///
+/// All documented macros can be used in your own code and enable
+/// advanced compile-time programming. For example, the 
+/// following code makes use of the ZEN_FOR_EACH macro:
+///
+/// ```
+/// #define DECLARE_INT(i, value) int var ## i = value;
+/// ZEN_FOR_EACH(DECLARE_INT, 1, 2, 3, 4)
+/// ```
+///
+/// This snippet generates the following code at compile-time:
+/// 
+/// ```
+/// int foo0 = 1;
+/// int foo1 = 2;
+/// int foo2 = 3;
+/// int foo3 = 4;
+/// ```
+///
+/// ## Macro Primer
+///
+/// There are two kinds of macros: object-like macros and function-like macros.
+///
+/// An object-like macro is a basic macro that does not contain any
+/// parentheses after the name, like the following example: 
+///
+/// ```
+/// #define FOO 42
+/// ```
+///
+/// Function-like macros are more complex macros that, just like regular C functions, 
+/// can accept a limited amount of arguments, which then will be substituted in the
+/// macro's body.
+///
+/// ```
+/// #define ASSIGN(a, b) a = b;
+/// ```
+///
+/// Object-like macros are always expanded as soon as possible, with a few exceptions.
+/// Function-like macros, on the other hand, can only be expanded when we explicitly provide
+/// some arguments to it. Therefore, function-like macros are much more powerful, and are 
+/// generally preferred over object-like macros when doing this kind of programming.
+///
+/// ## The Zen Macros
+/// 
+/// The following example demonstrates a macro that counts the arguments that are
+/// given to it:
+/// 
+/// ```cpp
+/// ZEN_VA_LENGTH(a, b, c, d) // evaluates to 4
+/// ```
+/// 
+/// This might not seem very useful, but it gets more interesting when the
+/// arguments come from another macro:
+/// 
+/// ```cpp
+/// #define DECLARE_INT_ARRAY(name,...) static const int name[ZEN_VA_LENGTH(__VA_ARGS__)] = { __VA_ARGS__ };
+/// 
+/// DECLARE_INT_ARRAY(a, b, c, d)
+/// ```
+/// 
+/// Of course, in the previous example we could just omit the array size from the
+/// declaration. However there are cases when this macro is extremely useful.
+/// 
 
-// This file was auto-generated on Nov 02 2019 14:41:14.
+// This file was auto-generated on Nov 03 2019 12:02:14.
 //
 // It is recommended not to edit this file by hand, but instead to
 // tweak the generator.
 
-/// Generic macros used throughout the Zen C++ libraries.
-///
-/// All documented macros can be used in your own code and enable
-/// highly advanced compile-time programming,
 
 #ifndef ZEN_MACRO_H
 #define ZEN_MACRO_H
@@ -16,6 +86,15 @@
 // Hattip to Yuri Solodkyy for pointing me in the right direction
 // https://groups.google.com/forum/#!topic/comp.std.c/d-6Mj5Lko_s
 
+/// Counts how many aguments are passed to this macro.
+///
+/// Usually, you want to call this function with some variant of `__VA_ARGS__`.
+///
+/// Example:
+///
+/// ```c
+/// ZEN_STATIC_ASSERT(ZEN_VA_LENGTH(1, 2, 3, 4) == 4);
+/// ```
 #define ZEN_VA_LENGTH(...) ZEN_VA_LENGTH_IMPL(__VA_ARGS__,ZEN_RSEQ_N())
 #define ZEN_VA_LENGTH_IMPL(...) ZEN_ARG_N(__VA_ARGS__)
 #define ZEN_ARG_N(_0,_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,N,...) N
@@ -26,12 +105,6 @@
 /// This macro delays substitution of an object-like macro until
 /// ZEN_EVAL is called.
 ///
-/// An object-like macro is a basic macro that does not contain any
-/// parentheses after the name, like in the following example: 
-///
-/// ```
-/// #define FOO 42
-/// ```
 #define ZEN_DEFER(...) __VA_ARGS__ ZEN_EMPTY()
 #define ZEN_DEFER_2(...) __VA_ARGS__ ZEN_DEFER ()
 #define ZEN_DEFER_3(...) __VA_ARGS__ ZEN_DEFER_2() ()
@@ -71,7 +144,7 @@
 /// failed.
 #define ZEN_STATIC_ASSERT(stmt) static_assert(stmt, "Compile-time assertion failed: " #stmt)
 
-/// A macro disable the 'unused variable' warning in certain compilers.
+/// A macro to disable the 'unused variable' warning in certain compilers.
 ///
 /// This is mainly useful in situations where a lot of variables are
 /// auto-generated and it is impossible to predict which ones will be used.
@@ -159,15 +232,57 @@
 #define ZEN_GET_VA_ARG_17(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17,...) arg17
 #define ZEN_GET_VA_ARG_18(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18,...) arg18
 #define ZEN_GET_VA_ARG_19(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, arg19,...) arg19
+
+/// Gets a specific argument from a list of arguments.
+///
+/// Usually, `__VA_ARGS__` is passed as the second argument to this macro.
+///
+/// The following example fetches the last argument in the list and
+/// ignores all previous arguments except the first:
+///
+/// ```c
+/// #define FOO(name, ...) static const int last__ ## name = ZEN_GET_VA_ARG(ZEN_PRED(ZEN_VA_LENGTH(__VA_ARGS__)), __VA_ARGS__);
+/// ```
+/// 
+/// \see ZEN_VA_LENGTH for getting the length of `__VA_ARGS__`.
+/// \see ZEN_PRED and ZEN_SUCC increasing or decreasing the argument offset.
 #define ZEN_GET_VA_ARG(n,...) ZEN_CONCAT(ZEN_GET_VA_ARG_, n)(__VA_ARGS__)
 
 
 #define ZEN_FOR_EACH_IMPL(i, m, ...) ZEN_FOR_EACH_IMPL2(i, m, ZEN_GET_VA_ARG(i, __VA_ARGS__))
 #define ZEN_FOR_EACH_IMPL2(i, m, ...) m(i, arg)
-#define ZEN_FOR_EACH_WITH(s, m, ...) ZEN_REPEAT_WITH(s, ZEN_VA_LENGTH(__VA_ARGS__), ZEN_FOR_EACH_IMPL, m, __VA_ARGS__)
-#define ZEN_FOR_EACH(m, ...) ZEN_FOR_EACH_WITH(, m, __VA_ARGS__)
-#define ZEN_FOR_EACH_ENUM(m, ...) ZEN_ENUM(ZEN_VA_LENGTH(__VA_ARGS__), ZEN_FOR_EACH_IMPL, m, __VA_ARGS__)
 
+/// The same as ZEN_FOR_EACH but the generated code fragments are seperated by \p s.
+///
+/// \see ZEN_FOR_EACH
+#define ZEN_FOR_EACH_WITH(s, m, ...) ZEN_REPEAT_WITH(s, ZEN_VA_LENGTH(__VA_ARGS__), ZEN_FOR_EACH_IMPL, m, __VA_ARGS__)
+
+/// Generates code fragments by applying the macro \p m to each individual argument passed to ZEN_FOR_EACH.
+///
+/// The macro receives an optional argument \p i that indicates the offset of the argument in the list.
+///
+/// ```
+/// #define DECLARE_INT(i, value) int var ## i = value;
+/// ZEN_FOR_EACH(DECLARE_INT, 1, 2, 3, 4)
+/// ```
+///
+/// This snippet generates the following code at compile-time:
+/// 
+/// ```
+/// int foo0 = 1;
+/// int foo1 = 2;
+/// int foo2 = 3;
+/// int foo3 = 4;
+/// ```
+#define ZEN_FOR_EACH(m, ...) ZEN_FOR_EACH_WITH(, m, __VA_ARGS__)
+
+/// The same as an invocation to ZEN_FOR_EACH_WITH where \p s equals a comma.
+///
+/// This macro exists because the parser confuses the comma for an empty argument.
+///
+/// \see ZEN_FOR_EACH_WITH if you need to use a seperator other than a comma.
+/// \see ZEN_FOR_EACH if you require no seperators.
+#define ZEN_FOR_EACH_ENUM(m, ...) ZEN_ENUM(ZEN_VA_LENGTH(__VA_ARGS__), ZEN_FOR_EACH_IMPL, m, __VA_ARGS__)
 
 
 #endif // #ifndef ZEN_MACRO_H
