@@ -33,13 +33,17 @@ add_custom_target(
 
 add_library(zen_base INTERFACE)
 target_include_directories(zen_base INTERFACE include/)
+set_target_properties(zen_base PROPERTIES PUBLIC_HEADER "include/zen/macros.h;include/zen/meta.hpp;include/zen/either.hpp;include/zen/value.hpp")
 add_dependencies(zen_base "${CMAKE_SOURCE_DIR}/include/zen/macros.h")
 
 add_library(zen_cli src/zen_cli.cc)
+set_target_properties(zen_cli PROPERTIES PUBLIC_HEADER "include/zen/cli.hpp")
 target_link_libraries(zen_cli zen_base)
 
 add_library(zen_full INTERFACE)
 add_dependencies(zen_full zen_base zen_cli)
+
+install(TARGETS zen_base zen_cli PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/zen")
 
 if (ZEN_ENABLE_TESTS)
 
