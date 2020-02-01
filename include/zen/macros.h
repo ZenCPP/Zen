@@ -112,7 +112,7 @@
 /// Forcefully terminate the program in order to prevent malicious entities
 /// from abusing an illegal state of the program.
 ///
-/// ````
+/// ```
 /// match(N)(
 ///   // ...
 ///   pattern(_) = [] { ZEN_PANIC("unexpected node"); }
@@ -151,7 +151,6 @@
 #define ZEN_ASSERT(test)
 #endif
 
-/// \internal
 #define ZEN_IS__EQ__(...) ,
 
 ///
@@ -181,44 +180,25 @@
              ZEN_HAS_COMMA( ZEN_IS__EQ__ __VA_ARGS__ () )   \
              )
 
-/// \internal
 #define ZEN_IS_EMPTY_HELPER(_0, _1, _2, _3) ZEN_HAS_COMMA(ZEN_PASTE_5(ZEN_IS_EMPTY_CASE_, _0, _1, _2, _3))
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0000 ZEN_IS_EMPTY_CASE_0000
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0001 ,
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0010 ZEN_IS_EMPTY_CASE_0010
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0011 ZEN_IS_EMPTY_CASE_0011
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0100 ZEN_IS_EMPTY_CASE_0100
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0101 ZEN_IS_EMPTY_CASE_0101
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0110 ZEN_IS_EMPTY_CASE_0110
-/// \internal
 #define ZEN_IS_EMPTY_CASE_0111 ZEN_IS_EMPTY_CASE_0111
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1000 ZEN_IS_EMPTY_CASE_1000
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1001 ZEN_IS_EMPTY_CASE_1001
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1010 ZEN_IS_EMPTY_CASE_1010
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1011 ZEN_IS_EMPTY_CASE_1011
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1100 ZEN_IS_EMPTY_CASE_1100
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1101 ZEN_IS_EMPTY_CASE_1101
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1110 ZEN_IS_EMPTY_CASE_1110
-/// \internal
 #define ZEN_IS_EMPTY_CASE_1111 ZEN_IS_EMPTY_CASE_1111
 
-/// \internal
 #define ZEN_NARG_EMPTY_1(N) 0
-/// \internal
 #define ZEN_NARG_EMPTY_0(N) N
 
 ///
@@ -230,18 +210,15 @@
 ///
 #define ZEN_NARG(...) ZEN_NARG__1(ZEN_IS_EMPTY(__VA_ARGS__), ZEN_NARGS(__VA_ARGS__))
 
-/// \internal
 #define ZEN_NARG__1(B, N) ZEN_NARG__2(ZEN_PASTE_2(ZEN_NARG_EMPTY_, B), N)
-/// \internal
 #define ZEN_NARG__2(B, N) B(N)
 
-/// \internal
 #define ZEN_SKIP_MAX_ARGS(_0,_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,_17,_18,_19,_20,_21,_22,_23,_24,_25,_26,_27,_28,_29,_30,_31,_32,...) _32
 
+// TODO add documentation
 // FIXME it might not be necessary to pre-evaluate using ZEN_NARGS_HELPER
 #define ZEN_NARGS(...) ZEN_NARGS_HELPER(__VA_ARGS__)
 
-/// \internal
 #define ZEN_NARGS_HELPER(...) ZEN_SKIP_MAX_ARGS(__VA_ARGS__,32,31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,)
 
 #define ZEN_HAS_COMMA(...) ZEN_SKIP_MAX_ARGS(__VA_ARGS__,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0)
@@ -502,7 +479,7 @@
 /// The following example fetches the last argument in the list and
 /// ignores all previous arguments except the first:
 ///
-/// ```c
+/// ```
 /// #define FOO(name, ...) static const int last__ ## name = ZEN_VA_GET(ZEN_PRED(ZEN_NARG(__VA_ARGS__)), __VA_ARGS__);
 /// ```
 /// 
