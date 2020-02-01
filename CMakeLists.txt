@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(ZenCPP CXX)
+project(Zen CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
