@@ -1,6 +1,17 @@
 /// \file zen/either.hpp
 /// \brief Encapsulation for computations that may fail.
 ///
+/// A common idiom is to use the type defined in this header on functions that
+/// can fail, as an alternatve to exception handling. Some hold that this is a
+/// good practice for several reasons:
+///
+/// - Absence of `throw`-statements may allow compilers to better reason
+///   about your program, possibly resulting in faster code.
+/// - Consumers of your API know immediately that a function might fail, and have to 
+///   deal with it explicitly.
+/// - Because the exception is encoded in the type, some bugs can be captured at
+///   compile-time that might otherwise be more subtle.
+///
 /// ### Working With Computations That May Fail
 ///
 /// Often, you find yourself interfacing with external systems, such as a network
