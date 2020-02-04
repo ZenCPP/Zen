@@ -31,39 +31,52 @@ add_custom_target(
   COMMENT "Generating documentation"
 )
 
+add_custom_target(
+  headers
+  DEPENDS
+  "${CMAKE_SOURCE_DIR}/include/zen/macros.h"
+)
+
+
 add_library(zen_base INTERFACE)
 target_include_directories(zen_base INTERFACE include/)
-set_target_properties(zen_base PROPERTIES PUBLIC_HEADER "include/zen/macros.h;include/zen/meta.hpp;include/zen/either.hpp;include/zen/value.hpp")
+# set_target_properties(zen_base PROPERTIES PUBLIC_HEADER "include/zen/macros.h;include/zen/meta.hpp;include/zen/either.hpp;include/zen/value.hpp")
 add_dependencies(zen_base "${CMAKE_SOURCE_DIR}/include/zen/macros.h")
 
 add_library(zen_cli src/zen_cli.cc)
-set_target_properties(zen_cli PROPERTIES PUBLIC_HEADER "include/zen/cli.hpp")
+# set_target_properties(zen_cli PROPERTIES PUBLIC_HEADER "include/zen/cli.hpp")
 target_link_libraries(zen_cli zen_base)
 
 add_library(zen_full INTERFACE)
 add_dependencies(zen_full zen_base zen_cli)
 
-install(TARGETS zen_base zen_cli PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/zen")
+# install(TARGETS zen_base zen_cli EXPORT Zen PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/zen")
+# install(TARGETS zen_cli EXPORT zen_cli PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/zen")
+# install(EXPORT Zen DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
 
 if (ZEN_ENABLE_TESTS)
 
   set(ZEN_TEST_TARGETS "")
+  set(ZEN_TEST_EXECUTABLES "")
 
   macro(add_gtest name)
     add_executable("${name}" ${ARGN})
     target_link_libraries("${name}" gtest gtest_main zen_full)
     add_custom_target("test_${name}" COMMAND "${name}" --gtest_color=yes COMMENT "Running tests ${name}")
     list(APPEND ZEN_TEST_TARGETS "test_${name}")
+    list(APPEND ZEN_TEST_EXECUTABLES "${name}")
   endmacro()
 
   add_gtest(zen_macros test/test_zen_macros.cc)
+  add_gtest(zen_clone_ptr test/test_zen_clone_ptr.cc)
+
+  add_custom_target(run_all_tests DEPENS ${ZEN_TEST_EXECUTABLES})
 
   # We create our own test target that does nothing more than runnning all
   # GoogleTest executables and printing the results. We could use CMake's
   # built-in testing infrastructure, but it seems like this technique is more
   # than enough.
-  add_custom_target(test DEPENDS ${ZEN_TEST_TARGETS})
+  add_custom_target(check DEPENDS ${ZEN_TEST_TARGETS})
 
 endif()
-
 

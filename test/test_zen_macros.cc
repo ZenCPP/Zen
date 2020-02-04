@@ -55,17 +55,27 @@ static_assert(ZEN_NARG(1, 2, 3) == 3);
 
 TEST(Macro, CanUseForLoop) {
   int test[] = { 0,0,0,0 };
-#define FOR_CALLBACK(i, name) name[i] = i;
-  ZEN_FOR(4, FOR_CALLBACK, test)
+#define FOR_CALLBACK(i,name) name[i] = i;
+  ZEN_FOR(4,FOR_CALLBACK,test);
   ASSERT_EQ(test[0], 0);
   ASSERT_EQ(test[1], 1);
   ASSERT_EQ(test[2], 2);
   ASSERT_EQ(test[3], 3);
 }
 
+TEST(Macro, CanUseForLoopNoArg) {
+  int foo[] = { 0,0,0,0 };
+#define FOR_CALLBACK2(i) foo[i] = i;
+  ZEN_FOR(4, FOR_CALLBACK2)
+  ASSERT_EQ(foo[0], 0);
+  ASSERT_EQ(foo[1], 1);
+  ASSERT_EQ(foo[2], 2);
+  ASSERT_EQ(foo[3], 3);
+}
+
 TEST(Macro, CanUseForLoopWithComma) {
 #define FOR_ENUM_CALLBACK(i,value) i + value
-  int test[] = { ZEN_FOR_ENUM(4, FOR_ENUM_CALLBACK, 1) };
+  int test[] = { ZEN_JOIN_ENUM(4, FOR_ENUM_CALLBACK, 1) };
   ASSERT_EQ(test[0], 1);
   ASSERT_EQ(test[1], 2);
   ASSERT_EQ(test[2], 3);
@@ -74,7 +84,7 @@ TEST(Macro, CanUseForLoopWithComma) {
 
 TEST(Macro, CanUseForLoopWithCusomSeparator) {
 #define FOR_WITH_CALLBACK(i,value) (i + value)
-  ASSERT_EQ(ZEN_FOR_WITH(+,4,FOR_WITH_CALLBACK,1), 10);
+  ASSERT_EQ(ZEN_JOIN(+,4,FOR_WITH_CALLBACK,1), 10);
 }
 
 TEST(Macro, CanUseEeachLoop) {

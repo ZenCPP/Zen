@@ -15,30 +15,34 @@ namespace zen {
     clone_ptr(T* ptr):
       ptr(ptr) {};
 
-    clone_ptr(clone_ptr&& other):
+    inline clone_ptr(clone_ptr&& other):
         ptr(std::move(other.ptr)) {
       other.ptr = nullptr;
     }
 
-    clone_ptr(const clone_ptr& other):
+    inline clone_ptr(const clone_ptr& other):
       ptr(clone(other.ptr)) {};
 
-    clone_ptr& operator=(clone_ptr&& other) {
+    inline clone_ptr& operator=(clone_ptr&& other) {
       ptr = std::move(other.ptr);
       other.ptr = nullptr;
       return *this;
     }
 
-    clone_ptr& operator=(const clone_ptr& other) {
+    inline clone_ptr& operator=(const clone_ptr& other) {
       ptr = clone(other.ptr);
       return *this;
     }
 
-    T* get() const {
+    inline T* operator->() const {
       return ptr;
     }
 
-    T& operator*() {
+    inline T* get() const {
+      return ptr;
+    }
+
+    inline T& operator*() {
       return *ptr;
     }
 

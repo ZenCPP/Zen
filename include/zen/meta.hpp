@@ -26,7 +26,7 @@ namespace zen {
   struct type_binder : std::integral_constant<std::size_t, N> {};
 
 #define ZEN_DECLARE_TYPE_BINDER(n) \
-  struct _ ## n : type_binder<n> {};
+  struct ZEN_PASTE_2(_, n) : type_binder<n> {};
 
   ZEN_FOR(10, ZEN_DECLARE_TYPE_BINDER);
 
@@ -36,8 +36,11 @@ namespace zen {
   template<std::size_t N>
   struct is_type_binder<type_binder<N>> : std::true_type {};
 
+  template<typename ...Ts>
+  struct has_type_binder : std::false_type {};
+
   template<typename T1, typename ...Ts>
-  struct has_type_binder  {
+  struct has_type_binder<T1, Ts...>  {
     static constexpr const bool value = is_type_binder<T1>::value || has_type_binder<Ts...>::value;
   };
 
@@ -45,7 +48,7 @@ namespace zen {
   struct is_lambda_expr : std::false_type {};
 
   template<template<typename ...> class K, typename ...Ts>
-  struct is_lambda_expr<K<Ts...>> : has_type_binder<Ts...>;
+  struct is_lambda_expr<K<Ts...>> : has_type_binder<Ts...> {};
 
   template<typename P, typename R, typename T>
   struct set_at;
@@ -58,12 +61,52 @@ namespace zen {
     using type = std::tuple<R, Ts...>;
   };
 
+#define ZEN_MAKE_TYPENAME(i) typename ZEN_PASTE_2(T, i)
+#define ZEN_MAKE_TYPEREF(i) ZEN_PASTE_2(T, i)
 
-  template<typename P, typename R, typename Ts>
-  struct set_at<P, R, std::tuple<Ts...>> {
-    using type = std::tuple
+  template<std::size_t I, typename R, typename Tuple>
+  struct tuple_set_at;
+
+  // template<typename R , ZEN_FOR_ENUM(2, ZEN_MAKE_TYPENAME) , typename ...Ts>
+  // struct tuple_set_at<2, R, std::tuple<ZEN_FOR_ENUM(2, ZEN_MAKE_TYPEREF), Ts...>> {
+  //   using type = std::tuple<ZEN_FOR_ENUM(2, ZEN_MAKE_TYPEREF), R, Ts...>;
+  // };
+
+#define ZEN_MAKE_TUPLE_SETTER(index) \
+  template<typename R , ZEN_JOIN_ENUM(ZEN_INC(index), ZEN_MAKE_TYPENAME) , typename ...Ts> \
+  struct tuple_set_at<index, R, std::tuple<ZEN_JOIN_ENUM(ZEN_INC(index), ZEN_MAKE_TYPEREF) , Ts...>> { \
+    using type = std::tuple<ZEN_FOR_ENUM(index, ZEN_MAKE_TYPEREF) R, Ts...>; \
   };
 
+  ZEN_MAKE_TUPLE_SETTER(1);
+  ZEN_MAKE_TUPLE_SETTER(2);
+  ZEN_MAKE_TUPLE_SETTER(4);
+  ZEN_MAKE_TUPLE_SETTER(5);
+  ZEN_MAKE_TUPLE_SETTER(6);
+  ZEN_MAKE_TUPLE_SETTER(7);
+  ZEN_MAKE_TUPLE_SETTER(8);
+  ZEN_MAKE_TUPLE_SETTER(9);
+
+  // FIXME The Zen++ macro library is not mature enough to handle the following case
+  // ZEN_FOR(10, ZEN_MAKE_TUPLE_SETTER);
+
+  template<typename TestT, typename ThenT>
+  struct case_t {
+    using condition_type = TestT;
+    using consequent_type = ThenT;
+  };
+
+  template<typename CaseT, typename ...CaseTs>
+  struct cond {
+    using type = typename std::conditional_t<
+      CaseT::condition_type::value,
+      typename CaseT::consequent_type,
+      typename cond<CaseTs...>::type
+    >;
+  };
+
+  template<typename ...CaseTs>
+  using cond_t = typename cond<CaseTs...>::type;
 
   template<std::size_t I, std::size_t K, typename ParamTs, typename ArgTs>
   struct apply_lambda_helper {
@@ -71,25 +114,51 @@ namespace zen {
     static_assert(I == std::tuple_size_v<ParamTs> && I > std::tuple_size_v<ArgTs>, "too few arguments provided to lambda expression");
     using param_type = std::tuple_element_t<I, ParamTs>;
     using type = cond_t<
-        case_t<std::is_same_v<param_type, _>, apply_lambda_helper<I+1, K+1, set_at<I, ParamTs, std::tuple_element_t<K, ArgTs>>,
+        case_t<
+          std::bool_constant<I == std::tuple_size_v<ParamTs>>,
+          ParamTs
+        >,
+        case_t<
+          std::is_same<param_type, _>,
+          typename apply_lambda_helper<I+1, K+1, tuple_set_at<I, ParamTs, std::tuple_element_t<K, ArgTs>>, ArgTs>::type
+        >,
+        case_t<
+          std::true_type,
+          typename apply_lambda_helper<I+1, K, ParamTs, ArgTs>::type>
         >;
   };
 
-  template<typename ParamTs, typename ArgTs>
-  struct apply_lambda_helper<std::tuple_size_v<ParamTs>
+  // template<std::size_t N, typename ...ArgTs>
+  // struct apply_lambda_helper<type_binder<N>, ArgTs...> {
+  //   static_assert(N < std::tuple_size_v<ArgTs...>, "too many arguments provided to lambda expresssion");
+  //   using type = std::tuple_element<N, std::tuple<ArgTs...>>;
+  // };
 
-  template<std::size_t N, typename ...ArgTs>
-  struct apply_lambda_helper<type_binder<N>, ArgTs...> {
-    static_assert(N < std::tuple_size_v<ArgTs...>, "too many arguments provided to lambda expresssion");
-    using type = std::tuple_element<N, std::tuple<ArgTs...>>;
+  template<template<typename ...> class Fn, typename T>
+  struct apply_sequence;
+
+  template<template <typename ...> class Fn, typename ...Ts>
+  struct apply_sequence<Fn, std::tuple<Ts...>> {
+    using type = Fn<Ts...>;
   };
+
+  template<template<typename ...> class Fn, typename T>
+  using apply_sequence_t = typename apply_sequence<Fn, T>::type;
 
   template<typename Fn, typename ...ArgTs>
   struct apply_lambda;
 
-  template<template<typename ...> class K, typename ...Ts, typename ...ArgTs>
-  struct apply_lambda<K<Ts...>, ArgTs...> {
-    using type = K<apply_lambda_helper<0, 0, std::tuple<Ts...>, std::tuple<ArgTs...>>::type>>;
+  template<template<typename ...> class Fn, typename ...Ts, typename ...ArgTs>
+  struct apply_lambda<Fn<Ts...>, ArgTs...> {
+    using type = apply_sequence_t<
+      Fn, 
+      typename apply_lambda_helper<
+          0,
+          0,
+          std::tuple<Ts...>,
+          std::tuple<ArgTs...>
+        >::type
+      >;
   };
 
   template<typename H, typename ...Ts>

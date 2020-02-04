@@ -2,6 +2,7 @@
 DEFAULT_ZEN_RELEASE_MODE = Release
 
 ZEN_RELEASE_MODE ?= $(DEFAULT_ZEN_RELEASE_MODE)
+ZEN_BUILD_DIR ?= build/$(ZEN_RELEASE_MODE)
 
 ifeq ($(ZEN_RELEASE_MODE),Debug)
 	ZEN_ENABLE_ASSERTIONS ?= 1
@@ -43,12 +44,13 @@ all:
 	    error messages. \
 	"
 
-build/$(ZEN_RELEASE_MODE): CMakeLists.txt
+$(ZEN_BUILD_DIR): CMakeLists.txt
 	@echo "Generating build files ..."
-	@mkdir -p build/$(ZEN_RELEASE_MODE)/ && \
-		cd build/$(ZEN_RELEASE_MODE)/ && \
+	@mkdir -p $(ZEN_BUILD_DIR)/ && \
+		cd $(ZEN_BUILD_DIR)/ && \
 		cmake ../../ \
 			-G Ninja \
+			-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 			-DCMAKE_BUILD_TYPE=$(ZEN_RELEASE_MODE) \
 			-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 			-DBUILD_SHARED_LIBS=$(ZEN_SHARED_LIBRARIES) \
@@ -59,12 +61,15 @@ build/$(ZEN_RELEASE_MODE): CMakeLists.txt
 
 clean:
 	@echo "Cleaning up build artifacts ..."
-	@rm -rf build/$(ZEN_RELEASE_MODE)
+	@rm -rf $(ZEN_BUILD_DIR)
 
-CMakeLists.txt:;
-Makefile:;
+.PHONY: debug
+	ninja -C $(ZEN_BUILD_DIR) run_all_tests
+	lldb -- $(ZEN_BUILD_DIR)/run_all_tests --gtest_color=yes
 
-.PHONY: %
+.PHONY: test
+test: $(ZEN_BUILD_DIR); ninja -C $(ZEN_BUILD_DIR) check
 
-%: build/$(ZEN_RELEASE_MODE)
-	ninja -C build/$(ZEN_RELEASE_MODE) $@
+.PHONY: build
+build: $(ZEN_BUILD_DIR); ninja -C $(ZEN_BUILD_DIR) zen_full
+

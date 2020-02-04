@@ -1,7 +1,7 @@
 
 #include "gtest/gtest.h"
 
-#include "zen/value_ptr.hpp"
+#include "zen/clone_ptr.hpp"
 
 struct Point {
 
@@ -14,8 +14,8 @@ struct Point {
 
 };
 
-TEST(ValuePtr, CanPassSimpleStructByValue) {
-  zen::ValuePtr<Point> p1 = zen::make_value_ptr<Point>(1, 2);
+TEST(clone_ptr, CanPassSimpleStructByValue) {
+  zen::clone_ptr<Point> p1 = zen::make_clonable<Point>(1, 2);
   ASSERT_EQ(p1->x, 1);
   ASSERT_EQ(p1->y, 2);
 }
