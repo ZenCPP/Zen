@@ -5,8 +5,10 @@
 #include <optional>
 #include <vector>
 #include <unordered_map>
+#include <string_view>
 
 #include "zen/meta.hpp"
+
 #include "zen/either.hpp"
 
 namespace zen {
@@ -76,24 +78,20 @@ namespace zen {
 
       constexpr auto list() { ZEN_CLONE_FLAG_T(ProgramT, ArgT, IsRequired, true); }
 
-      constexpr auto build() {
+      constexpr auto finish() {
         return program.insert_flag(*this);
       }
 
     };
 
-//    constexpr auto flag(std::string_view pattern) {
-//      return flag_t<std::string, false, false>{
-//          .pattern = pattern,
-//          .description = "",
-//          .min_count = 0,
-//          .max_count = 1
-//      };
-//    }
-
     using arg_size_t = int;
     using error_list_t = std::vector<std::string>;
     using arg_list_t = std::vector<std::string_view>;
+
+    template<typename T>
+    struct get_value_type_ {
+      using type = typename T::value_type;
+    };
 
     template<typename FlagsT>
     class program_description_t {
@@ -101,22 +99,10 @@ namespace zen {
       using init_flag_t = flag_t<program_description_t, std::string, false, false>;
 
       template<typename Tag>
-      using is_tagged_with = std::is_same_v<Tag, T::tag_type>;
-
-      template<typename Tag>
       using get_flags_index = find_t< std::is_same<Tag, _>, FlagsT >;
 
-      template<typename Tag, typename FlagT, typename ...FlagTs>
-      struct find_flag;
-
-    public:
-
-      FlagsT flags;
-
-      std::string_view name;
-      std::optional<std::string_view> description;
-
       template<typename FlagT>
+
       inline constexpr auto insert_flag(FlagT flag) {
         using new_program_description_t = program_description_t<rcons_t<FlagT, FlagsT> >;
         return new_program_description_t{
@@ -125,6 +111,13 @@ namespace zen {
             .description = description,
         };
       }
+
+    public:
+
+      FlagsT flags;
+
+      std::string_view name;
+      std::optional<std::string_view> description;
 
       inline constexpr program_description_t &describe(std::string_view new_description) {
         return program_description_t{
@@ -147,7 +140,7 @@ namespace zen {
 
       class values_t {
 
-        using storage_t = map_type<get_value_type, FlagsT>;
+        using storage_t = map_<get_value_type_, FlagsT>;
 
         storage_t storage;
 
@@ -155,7 +148,7 @@ namespace zen {
 
         template<typename Tag>
         auto get() {
-          return std::get<get_flag_index<Tag>::value>(storage);
+          return std::get<get_flag_index_v<Tag>>(storage);
         }
 
       };
@@ -200,8 +193,13 @@ namespace zen {
 
     };
 
-    template<typename ProgramT>
-
+    constexpr auto program(std::string_view name) {
+      return program_description_t<std::tuple<>> {
+        .flags = std::make_tuple(),
+        .name = name,
+        .description = {}
+      };
+    }
 
   } // of namespace cli
 
