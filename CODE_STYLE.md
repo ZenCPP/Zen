@@ -6,9 +6,21 @@ parts of the libraries. If you plan to update or extend the Zen++ libraries,
 then you are expected to have read this document at least once. Code that does
 not follow the guidelines may be rejected at any moment.
 
+### Prefix non-member functions that _construct_ a specific type with `make_`
+
+This is the same convention that is used in the standard library. Function
+names such as `make_unique` and `make_shared` remind the user that a new type
+will be constructed, and that the caller is responsible for its ownership.
+
 ## Template metaprogramming
 
-### Metafunctions should be suffixed with `_`
+### Use CamelCase for template parameters
+
+Given that almost everything else is in `snake_case`, this makes it very easy
+to spot parametrised types. Moreover, this convention ensures we are in line
+with the conventions that are used in the standard library.
+
+### Template metafunctions should be suffixed with `_`
 
 In order to distinguish metafunctions from other types and from plain
 functions, the suffix `_` should be added to the name of the metafunction. For
@@ -32,6 +44,20 @@ which all members can be inspected at compile-time and has no use at run-time.
 The members of the resulting type usually hold information about how other
 metafunctions should operate on it.
 
+### A public template metafunction that returns a type should have a type alias suffixed with `_t`
+
+The type alias should resolve to the result of the compile-time computation. For example,
+a template `foo_` with one type parameter `T` should have the following declaration:
+
+```cpp
+template<typenme T>
+using foo_t = typename foo_<T>::type;
+```
+
+This rule is a convenience that is also present in the standard library. Those
+who write libraries are required to do some more work, while the user can
+write the shorter `foo_t<T>` instead of `typename foo_<T>::type`.
+
 ### Don't use non-type template parameters in public template metafunctions
 
 User-facing metafunctions should operate solely on types. The only exception to
@@ -51,7 +77,7 @@ struct nth_;
 
 The previous example should be replaced with the following code:
 
-```
+```cpp
 template<typename N, typename SeqT>
 struct nth_;
 ```

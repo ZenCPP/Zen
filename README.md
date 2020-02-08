@@ -23,7 +23,6 @@ add_subdirectory(vendor/zen EXCLUDE_FROM_ALL)
 # ...
 
 target_link_libraries(myapp zen_base)
-
 ```
 
 Additionally, we are working on a system that will automatically detect,
@@ -35,21 +34,6 @@ the construction of this build tool will take a while.
 Documentation will soon be available on [the official website][1]. For now, you
 will have to consult the header files in `include/zen/` to learn more.
 Alternatively, you can try to build the documentation locally using [Doxygen][2].
-
-## Coding standard
-
-We try to mimick the C++ standard library coding conventions as much as
-possible, in the same way the Boost project does.
-
- - All identifiers are written in `snake_case`, unless it is a template
-   parameter. Template parameters are always written in `CamelCase`.
- - When there is potential confusion about whether a source object is a type, a
-   function or something else, we append the `_t` suffix to the name.
- - Functions that construct a certain type are prefixed with `make_`, e.g.
-   `make_program` or `make_cloned`.
-
-As a general rule of thumb, the code should be compatible with the standard
-library and be as clear as possible.
 
 ## License
 
