@@ -14,7 +14,7 @@ if (ZEN_ENABLE_TESTS)
   add_subdirectory(third_party/googletest EXCLUDE_FROM_ALL)
 endif()
 
-include_directories(include/)
+include_directories(./)
 
 add_custom_command(
   OUTPUT "${CMAKE_SOURCE_DIR}/include/zen/macros.h"
@@ -67,8 +67,8 @@ if (ZEN_ENABLE_TESTS)
     list(APPEND ZEN_TEST_EXECUTABLES "${name}")
   endmacro()
 
-  add_gtest(zen_macros test/test_zen_macros.cc)
-  add_gtest(zen_clone_ptr test/test_zen_clone_ptr.cc)
+  add_gtest(zen_macros zen/macros_test.cc)
+  add_gtest(zen_clone_ptr zen/clone_ptr_test.cc)
 
   add_custom_target(run_all_tests DEPENS ${ZEN_TEST_EXECUTABLES})
 

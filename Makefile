@@ -64,6 +64,7 @@ clean:
 	@rm -rf $(ZEN_BUILD_DIR)
 
 .PHONY: debug
+debug:
 	ninja -C $(ZEN_BUILD_DIR) run_all_tests
 	lldb -- $(ZEN_BUILD_DIR)/run_all_tests --gtest_color=yes
 
