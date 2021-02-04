@@ -793,11 +793,16 @@
 /// prevents users from directly moving complex structures into a vector.
 ///
 /// ```
-/// ZEN_MOVE_INIT(my_data, std::vector<std::unique_ptr<foo_t>>, std::make_unique<foo_t>(1), std::make_unique<foo_t>(2));
+/// ZEN_MOVE_INIT(
+///   my_data,
+///   std::vector<std::unique_ptr<foo_t>>,
+///   std::make_unique<foo_t>(1),
+///   std::make_unique<foo_t>(2)
+/// );
 /// return std::move(my_data);
 /// ```
 ///
-#define ZEN_MOVE_INIT(name, type, __VA_ARGS__) \
+#define ZEN_MOVE_INIT(name, type, ...) \
   type::value_type ZEN_PASTE_2(name, __data)[] = { __VA_ARGS__ }; \
   type name { std::make_move_iterator(std::begin(ZEN_PASTE_2(name, __data))), std::make_move_iterator(std::end(ZEN_PASTE_2(name, __data))) };
 
