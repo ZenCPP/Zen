@@ -824,6 +824,33 @@ namespace zen {
     using type = std::conditional_t<is_primitive_v<intermediate_type>, intermediate_type, typename intermediate_type::type>;
   };
 
+  template<typename H, typename T>
+  struct rcons_ :
+    defun_t<
+      $cond_<
+        $case_<is_empty_<H>, T>,
+        $else_<cons_<head_<H>, rcons_<tail_<H>, T>>>
+      >
+    > {};
+
+  template<typename H, typename T>
+  using rcons_t = typename rcons_<H, T>::type;
+
+  template<typename F, typename L, size_t i>
+  struct find_helper_ :
+    defun_t<
+      $cond_<
+        $case_< apply_<F, head_<L> >, u_ < i > >,
+        $else_ < find_helper_<F, tail_<L>, i+1 > >
+      >
+    > {};
+
+  template<typename F, typename L>
+  using find_ = find_helper_<F, L, 0>;
+
+  template<typename F, typename L>
+  using find_t = typename find_<F, L>::type;
+
   template<typename L1, typename L2>
   struct override_ :
     defun_t<
