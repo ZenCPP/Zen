@@ -72,7 +72,7 @@ debug:
 	ninja -C $(ZEN_BUILD_DIR) alltests
 	lldb -- $(ZEN_BUILD_DIR)/alltests --gtest_color=yes
 
-$(ZEN_BUILD_DIR)/alltests: meson
+$(ZEN_BUILD_DIR)/alltests: meson $(wildcard src/*)
 	ninja -C $(ZEN_BUILD_DIR) alltests
 
 .PHONY: test
