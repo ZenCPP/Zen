@@ -32,7 +32,7 @@
 #ifndef ZEN_EMPTY_HPP
 #define ZEN_EMPTY_HPP
 
-#include "zen/meta/primitives.hpp"
+#include "zen/meta.hpp"
 
 namespace zen {
 
