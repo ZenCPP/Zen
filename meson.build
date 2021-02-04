@@ -22,5 +22,5 @@ zen_dep = declare_dependency(
 alltests = executable(
   'alltests',
   include_directories: '.',
-  dependencies: [ gtest_dep, gtest_main_dep ],
+  dependencies: [ zen_dep, gtest_dep, gtest_main_dep ],
 )
