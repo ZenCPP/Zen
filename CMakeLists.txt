@@ -40,8 +40,8 @@ install(TARGETS zen EXPORT Zen)
 install(EXPORT Zen DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
 
 if (ZEN_ENABLE_TESTS)
-  add_executable(testall zen/macros_test.cc zen/clone_ptr_test.cc zen/cli_test.cc)
-  target_link_libraries(testall zen gtest gtest_main)
-  add_custom_target(check COMMAND testall --gtest_color=yes COMMENT "Running tests")
+  add_executable(alltests zen/macros_test.cc zen/clone_ptr_test.cc zen/cli_test.cc)
+  target_link_libraries(alltests zen gtest gtest_main)
+  add_custom_target(check COMMAND alltests --gtest_color=yes COMMENT "Running tests")
 endif()
 
