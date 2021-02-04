@@ -2,7 +2,7 @@
 DEFAULT_ZEN_RELEASE_MODE = Release
 
 ZEN_RELEASE_MODE ?= $(DEFAULT_ZEN_RELEASE_MODE)
-ZEN_BUILD_DIR ?= build/$(ZEN_RELEASE_MODE)
+ZEN_BUILD_DIR ?= build
 
 ifeq ($(ZEN_RELEASE_MODE),Debug)
 	ZEN_ENABLE_ASSERTIONS ?= 1
@@ -14,11 +14,16 @@ endif
 
 ZEN_SHARED_LIBRARIES ?= 0
 
-all:
+all: test
+
+meson: $(ZEN_BUILD_DIR)/build.ninja
+
+$(ZEN_BUILD_DIR)/build.ninja: meson.build
+	meson build
+
+.PHONY: help
+help:
 	@echo "\
-	You are running 'make' in the root directory of the Zen++ project. \n\
-	By default, this does nothing. Below are instructions on how you can build these libraries. \n\
-	\n\
 	These are some of the available targets: \n\
 	\n\
 	  make install -- Build and then install the libraries to the default directory on your system \n\
@@ -58,19 +63,19 @@ $(ZEN_BUILD_DIR): CMakeLists.txt
 			-DZEN_ENABLE_TESTS=ON
 
 .PHONY: clean
-
 clean:
 	@echo "Cleaning up build artifacts ..."
 	@rm -rf $(ZEN_BUILD_DIR)
 
 .PHONY: debug
 debug:
-	ninja -C $(ZEN_BUILD_DIR) run_all_tests
-	lldb -- $(ZEN_BUILD_DIR)/run_all_tests --gtest_color=yes
+	ninja -C $(ZEN_BUILD_DIR) alltests
+	lldb -- $(ZEN_BUILD_DIR)/alltests --gtest_color=yes
+
+$(ZEN_BUILD_DIR)/alltests: meson
+	ninja -C $(ZEN_BUILD_DIR) alltests
 
 .PHONY: test
-test: $(ZEN_BUILD_DIR); ninja -C $(ZEN_BUILD_DIR) check
-
-.PHONY: build
-build: $(ZEN_BUILD_DIR); ninja -C $(ZEN_BUILD_DIR) zen_full
+test: $(ZEN_BUILD_DIR)/alltests
+	"$(ZEN_BUILD_DIR)/alltests"
 
