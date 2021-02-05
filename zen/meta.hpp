@@ -266,10 +266,11 @@ namespace zen {
   template<typename T>
   inline constexpr bool is_primitive_v = is_primitive_<T>::value;
 
+  template<typename ...Ts> struct is_primitive_<std::tuple<Ts...>> : true_ {};
   template<bool B> struct is_primitive_<bool_<B>> : true_ {};
   template<typename T, T V> struct is_primitive_<std::integral_constant<T, V>> : true_ {};
   template<template <typename ...> class T> struct is_primitive_<template_<T>> : true_ {};
-;
+
   template<typename HeadT, typename TailL>
   struct cons_impl_ {
     ZEN_MISSING_IMPLEMENTATION(HeadT, cons_);
@@ -368,7 +369,7 @@ namespace zen {
    */
   template<std::size_t I>
   struct arg_n_ {
-    static constexpr const std::size_t index = I;
+    static constexpr std::size_t index = I;
   };
 
   using _0 = arg_n_<0>;
@@ -434,7 +435,7 @@ namespace zen {
   struct size_;
 
   template<typename T>
-  inline constexpr bool size_v = size_<T>::value;
+  inline constexpr std::size_t size_v = size_<T>::value;
 
   template<typename T>
   struct is_empty_;
@@ -702,7 +703,7 @@ namespace zen {
 
   template<typename T>
   struct some_t {
-    static constexpr const bool has_some = true;
+    static constexpr bool has_some = true;
     using value_type = T;
   };
 
@@ -796,7 +797,7 @@ namespace zen {
 
   template<typename T, typename EnvT>
   struct eval_ {
-    static_assert(is_primitive_v<T>, "could not evaluate type at compile-time because it does not resolve to a primitive type");
+    //static_assert(is_primitive_v<T>, "could not evaluate type at compile-time because it does not resolve to a primitive type");
     using type = T;
   };
 
@@ -824,17 +825,22 @@ namespace zen {
     using type = std::conditional_t<is_primitive_v<intermediate_type>, intermediate_type, typename intermediate_type::type>;
   };
 
-  template<typename H, typename T>
+  template<typename E, typename L>
   struct rcons_ :
     defun_t<
       $cond_<
-        $case_<is_empty_<H>, T>,
-        $else_<cons_<head_<H>, rcons_<tail_<H>, T>>>
+        $case_<is_empty_<L>, list_<E>>,
+        $else_<cons_<head_<L>, rcons_<E, tail_<L>>>>
       >
     > {};
 
-  template<typename H, typename T>
-  using rcons_t = typename rcons_<H, T>::type;
+  template<typename E, typename L>
+  using rcons_t = typename rcons_<E, L>::type;
+
+  template<typename T, typename ...Ts>
+  constexpr auto rcons(T element, std::tuple<Ts...> list) {
+    return std::tuple_cat(list, std::make_tuple(element));
+  }
 
   template<typename F, typename L, size_t i>
   struct find_helper_ :
@@ -956,7 +962,7 @@ namespace zen {
 
   template<typename ListT, std::size_t I>
   struct list_iterator_t {
-    static constexpr const std::size_t index = I;
+    static constexpr std::size_t index = I;
     using container_type = ListT;
   };
 
@@ -1321,6 +1327,11 @@ namespace zen {
   // struct take_list_helper_<N, list_t<L1, Ls...>, list_t<Rs...>> {
   //   using type = typename take_list_helper_<N-1, list_t<Ls...>, list_t<L1, Rs...>>::type;
   // };
+
+  template<typename T1, typename T2>
+  constexpr auto max(T1 x, T2 y) {
+    return x > y ? x : y;
+  }
 
 } // of namespace zen
 
