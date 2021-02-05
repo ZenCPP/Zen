@@ -93,6 +93,8 @@
 #ifndef ZEN_EITHER_HPP
 #define ZEN_EITHER_HPP
 
+#include <utility>
+
 #include "zen/macros.h"
 
 namespace zen {
@@ -120,14 +122,11 @@ namespace zen {
     friend
     class either;
 
-    struct dummy {
-    };
+    struct dummy {};
 
     union {
-
       L left_value;
       R right_value;
-
     };
 
     bool has_right_v;
@@ -187,6 +186,13 @@ namespace zen {
     bool is_left() { return !has_right_v; }
 
     bool is_right() { return has_right_v; }
+
+    R unwrap() {
+      if (!has_right_v) {
+        ZEN_PANIC("trying to unwrap a zen::either which is left-valued");
+      }
+      return right_value;
+    }
 
     L &left() {
       ZEN_ASSERT(!has_right_v);
@@ -256,7 +262,7 @@ namespace zen {
   };
 
   template<typename L>
-  left_t<L> left(const L& value) {
+  left_t<L> left(L& value) {
     return left_t<L> { value };
   }
 
