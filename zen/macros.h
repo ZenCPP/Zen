@@ -128,6 +128,11 @@
 /// more arguments than the amount that is specified here.
 #define ZEN_MAX_ARGS 32
 
+#define ZEN_STRINGIFY_HELPER(expr) #expr
+
+/// Converts any macro expression to a string by first evaluating it.
+#define ZEN_STRINGIFY(expr) ZEN_STRINGIFY_HELPER(expr)
+
 /// Use this macro anywhere in your code to force a breakpoint.
 ///
 /// The implementation details of this macro may change between versions.
@@ -145,7 +150,7 @@
 /// ```
 #ifndef NDEBUG
 #define ZEN_PANIC(message) \
-  fprintf(stderr, "%s: %i: " message, __FILE__, __LINE__); \
+  fprintf(stderr, __FILE__ ":" ZEN_STRINGIFY(__LINE__) ": %s\n", message); \
   ZEN_ABORT
 #else
 #define ZEN_PANIC(message) \
