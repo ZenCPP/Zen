@@ -38,10 +38,10 @@ namespace zen {
 
       /// Create a freshly allocated std::string that will contain the entire
       /// file contents.
-      std::string as_string();
+      std::string as_string() const;
 
       /// Convert the contents of the associated file to a string
-      std::string_view as_string_view();
+      std::string_view as_string_view() const;
 
     };
 
