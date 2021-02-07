@@ -10,4 +10,6 @@
 
 #define ZEN_AUTO_SIZE (-1)
 
+#define ZEN_COULD_NOT_OPEN_FILE 1
+
 #endif // #ifndef ZEN_CONFIG_H

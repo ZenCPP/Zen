@@ -69,6 +69,8 @@ namespace zen {
 
     };
 
+    result<std::string> read_file(path p);
+
     result<file> file_from_path(path p);
 
   }
