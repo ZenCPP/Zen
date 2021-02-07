@@ -7,7 +7,9 @@ gtest_proj = subproject('gtest')
 gtest_dep = gtest_proj.get_variable('gtest_dep')
 gtest_main_dep = gtest_proj.get_variable('gtest_main_dep')
 
-zen_sources = []
+zen_sources = [
+  'zen/fs_common.cc',
+]
 
 if target_machine.system() == 'linux'
   zen_sources += [
@@ -27,9 +29,16 @@ zen_dep = declare_dependency(
   include_directories: '.',
 )
 
+po_example = executable(
+  'po-example',
+  'zen/po_sample_main.cc',
+  link_with: zen_lib
+)
+
 alltests = executable(
   'alltests',
   'zen/meta_test.cc',
+  'zen/po_test.cc',
   'zen/fs_test.cc',
   include_directories: '.',
   cpp_args: [ '-Wall' ],
