@@ -94,6 +94,7 @@
 #define ZEN_MACROS_H
 
 #include <cstdlib>
+#include <stdio.h>
 
 #define ZEN_EMPTY
 
