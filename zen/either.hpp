@@ -93,9 +93,11 @@
 #ifndef ZEN_EITHER_HPP
 #define ZEN_EITHER_HPP
 
+#include <type_traits>
 #include <utility>
 
 #include "zen/macros.h"
+#include "zen/empty.hpp"
 
 namespace zen {
 
@@ -219,29 +221,26 @@ namespace zen {
 
     struct dummy {};
 
-    union data_t {
-      L left;
-      dummy right;
+    union {
+      L left_value;
     };
-
-    data_t data;
 
     bool has_left;
 
   public:
 
-    inline either(left_t<L> data): data(data.value),  has_left(true) {};
+    inline either(left_t<L> data): left_value(data.value), has_left(true) {};
     inline either(right_t<void>): has_left(false) {};
 
     either(either&& other): has_left(other.has_left) {
       if (other.has_left) {
-        data.left = std::move(other.data.left);
+        left_value = std::move(other.data.left);
       }
     }
 
     either(const either& other): has_left(other.has_left) {
       if (other.has_left) {
-        data.left = other.data.left;
+        left_value = other.data.left;
       }
     }
 
@@ -250,12 +249,12 @@ namespace zen {
 
     L& left() const {
       ZEN_ASSERT(has_left);
-      return data.left;
+      return left_value;
     }
 
     ~either() {
       if (has_left) {
-        data.left.~L();
+        left_value.~L();
       }
     }
 
@@ -269,6 +268,11 @@ namespace zen {
   template<typename L>
   left_t<L> left(L&& value) {
     return left_t<L> { std::move(value) };
+  }
+
+  /// Construct a right-valued either type that has no contents.
+  inline right_t<void> right() {
+    return right_t<void> {};
   }
 
   template<typename R>
