@@ -1,12 +1,13 @@
 #ifndef ZEN_STREAM_HPP
 #define ZEN_STREAM_HPP
 
-#include "zen/maybe.hpp"
 #include <deque>
+
+#include "zen/maybe.hpp"
 
 namespace zen {
 
-  template<typename T>
+  template<typename T, typename SizeT = std::size_t>
   class stream {
   public:
 
@@ -14,8 +15,8 @@ namespace zen {
     virtual maybe<T> get() = 0;
 
     /// @brief Skip over a fixed amount of tokens
-    inline virtual void skip(std::size_t count = 1) {
-      for (std::size_t i = 0; i < count; i++) {
+    inline virtual void skip(SizeT count = 1) {
+      for (SizeT i = 0; i < count; i++) {
         get();
       }
     }
@@ -25,7 +26,7 @@ namespace zen {
   };
 
   template<typename T, typename SizeT = std::size_t>
-  class peek_stream {
+  class peek_stream : public stream<T> {
   public:
 
     /// @brief Get some token in the stream without consuming any
@@ -52,7 +53,7 @@ namespace zen {
       } else {
         auto token = buffer.front();
         buffer.pop_front();
-        return right(token);
+        return some(token);
       }
     }
 
@@ -64,7 +65,7 @@ namespace zen {
         }
         buffer.push_back(token);
       }
-      return buffer[offset-1];
+      return some(buffer[offset-1]);
     }
 
   };
