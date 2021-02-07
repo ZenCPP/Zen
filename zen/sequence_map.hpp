@@ -58,11 +58,13 @@ namespace zen {
     sequence_map(sequence_map&& other) = default;
 
     template<typename ...ForwardArgs>
-    void emplace(ForwardArgs&& ...args) {
+    value_type& emplace(ForwardArgs&& ...args) {
       auto to_insert = value_type(std::forward<ForwardArgs>(args)...);
       sequence.push_back(to_insert);
-      auto& [key, value] = sequence.back();
-      index.emplace(key, value);
+      auto& inserted = sequence.back();
+      auto& [key, value] = inserted;
+      index.emplace(key, &value);
+      return inserted;
     }
 
     sequence_map& operator=(sequence_map&& other) {
@@ -87,6 +89,14 @@ namespace zen {
 
     reference operator[](key_type&& key) {
       return index[std::move(key)];
+    }
+
+    iterator begin() {
+      return sequence.begin();
+    }
+
+    iterator end() {
+      return sequence.end();
     }
 
   };
