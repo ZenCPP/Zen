@@ -1,10 +1,37 @@
-Zen++ Coding Style Guidelines
-==============================
+Zen C++ Coding Style
+====================
 
-This page tries to list all rules and conventions that are used when working on
-parts of the libraries. If you plan to update or extend the Zen++ libraries,
-then you are expected to have read this document at least once. Code that does
-not follow the guidelines may be rejected at any moment.
+This document outlines the coding style that is used thoughout the Zen++
+libraries.
+
+⚠️ These conventions are not yet mature enough to be used in serious projects. Expect
+many breaking changes. If you plan to use them, know that you might have to
+refactor your code.
+
+This guide is primarily targeted at people who are staring a fresh project that
+makes use of the Zen++ libraries and developers wishing to contribute to the
+Zen++ project. Existing projects that wish to make use of these libraries
+should ignore this document and instead follow the coding style of their project.
+
+If you're planning to contribute to the Zen++ project, please take some time to
+skim through this document. Code that does not follow the guidelines may be
+rejected.
+
+## General
+
+### Always use the correct naming convention
+
+ - Macro names should be `ALL_CAPS`.
+ - Functions and variables should be `snake_case`
+ - Types, classes and concepts should be `CamelCase`
+
+**Motivation:** `CamelCase` is used in many programming languages for types and
+classes. Concepts are closely related to types and functions so they should use
+the same casing. Since functions can also be variables and should not be
+confused with type constructors, they both have the same casing . Almost all
+C/C++ code uses `ALL_CAPS` for macros, so people are already used to it. Above
+that, it clearly indicates that a macro call is not a function and may generate
+arbitrary code with potential side-effects.
 
 ### Prefix non-member functions that _construct_ a specific type with `make_`
 
