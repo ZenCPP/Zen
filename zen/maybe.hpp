@@ -48,19 +48,22 @@ namespace zen {
 
     template<typename T2>
     inline Maybe(const Maybe<T2>& other):
-      has_value(other.has_value) {
-        if (other.has_value) {
-          value = other.value;
+      // We only use the public API here because we do not know how a specific
+      // Maybe<T> might be implemented.
+      has_value(other.is_some()) {
+        if (has_value) {
+          new(&value)T(*other);
         }
       }
 
-    template<typename T2>
-    inline Maybe(Maybe<T2>&& other):
-      has_value(std::move(other.has_value)) {
-        if (has_value) {
-          value = std::move(other.value);
-        }
-      }
+   // template<typename T2>
+   // inline Maybe(Maybe<T2>&& other):
+   //   has_value(std::move(other.is_some())) {
+   //     if (has_value) {
+   //       value = std::move(*other);
+   //       other.reset();
+   //     }
+   //   }
 
     Maybe<T>& operator=(const Maybe<T>& other) {
       has_value = other.has_value;
@@ -79,7 +82,6 @@ namespace zen {
       return *this;
     }
 
-
     inline bool is_some() const {
       return has_value;
     }
@@ -89,6 +91,11 @@ namespace zen {
     }
 
     T& operator*() {
+      ZEN_ASSERT(has_value);
+      return value;
+    }
+
+    const T& operator*() const {
       ZEN_ASSERT(has_value);
       return value;
     }
