@@ -28,10 +28,11 @@ rejected.
 **Motivation:** `CamelCase` is used in many programming languages for types and
 classes. Concepts are closely related to types and functions so they should use
 the same casing. Since functions can also be variables and should not be
-confused with type constructors, they both have the same casing . Almost all
-C/C++ code uses `ALL_CAPS` for macros, so people are already used to it. Above
-that, it clearly indicates that a macro call is not a function and may generate
-arbitrary code with potential side-effects.
+confused with type constructors, they both have the same casing. `snake_case`
+is ideal because it interoperates well with C. Almost all C/C++ code uses
+`ALL_CAPS` for macros, so people are already used to it. Above that, it clearly
+indicates that a macro call is not a function and may generate arbitrary code
+with potential side-effects.
 
 ### Prefix non-member functions that _construct_ a specific type with `make_`
 
