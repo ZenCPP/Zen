@@ -27,6 +27,44 @@ namespace zen {
     }
   }
 
+  /// @brief A range derived from two STL iterators
+  ///
+  /// This wrapper type enables passing down an iterator pair to other
+  /// functions in a single parameter.
+  template<typename IterT>
+  class IterRange {
+  public:
+
+    using Iter = IterT;
+    using Value = typename IterT::value_type;
+
+    using value_type = Value;
+
+  private:
+
+    Iter begin_iter;
+    Iter end_iter;
+
+  public:
+
+    inline IterRange(Iter begin_iter, Iter end_iter):
+      begin_iter(begin_iter), end_iter(end_iter) {}
+
+    inline Iter begin() {
+      return begin_iter;
+    }
+
+    inline Iter end() {
+      return end_iter;
+    }
+
+  };
+
+  template<typename IterT>
+  inline IterRange<IterT> make_iter_range(IterT begin, IterT end) {
+    return IterRange<IterT> { begin, end };
+  }
+
 } // of namespace zen
 
 #endif // ZEN_RANGE_HPP

@@ -8,27 +8,30 @@
 namespace zen {
 
   // TODO This should be a strong type
-  using glyph_t = char32_t;
+  using Glyph = char32_t;
 
-  inline constexpr const glyph_t eof = 0xFFFF;
+  inline constexpr const Glyph eof = 0xFFFF;
 
   // TODO The internal representation should be converted to UTF-8
-  using string = std::basic_string<glyph_t>;
+  using String = std::basic_string<Glyph>;
+
+  // TODO The internal representation should be converted to UTF-8
+  using string_view = std::basic_string_view<Glyph>;
 
   template<>
-  class maybe<glyph_t> {
+  class Maybe<Glyph> {
 
-    glyph_t value;
+    Glyph value;
 
   public:
 
-    inline maybe():
+    inline Maybe():
       value(eof) {}
 
-    inline maybe(glyph_t value):
+    inline Maybe(Glyph value):
       value(value) {}
 
-    glyph_t* operator->() {
+    Glyph* operator->() {
       return &value;
     }
 
@@ -43,13 +46,13 @@ namespace zen {
   };
 
   // FIXME Currently only works for ASCII values.
-  inline string from_utf8(std::string_view raw) {
-    return string { raw.begin(), raw.end() };
+  inline String from_utf8(std::string_view raw) {
+    return String { raw.begin(), raw.end() };
   }
 
   template<std::size_t N>
-  inline string from_utf8(const char ptr[N]) {
-    return string { ptr, ptr + N };
+  inline String from_utf8(const char ptr[N]) {
+    return String { ptr, ptr + N };
   }
 
 #define ZEN_STRING_LITERAL(literal) ::zen::from_utf8(literal)

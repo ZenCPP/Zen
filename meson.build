@@ -40,6 +40,7 @@ alltests = executable(
   'zen/meta_test.cc',
   'zen/po_test.cc',
   'zen/fs_test.cc',
+  'zen/dllist_test.cc',
   include_directories: '.',
   cpp_args: [ '-Wall' ],
   dependencies: [ zen_dep, gtest_dep, gtest_main_dep ],

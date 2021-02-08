@@ -9,7 +9,7 @@ namespace zen {
 
   namespace fs {
 
-    result<std::string> read_file(path p) {
+    Result<std::string> read_file(Path p) {
 
       std::ifstream input(p);
 

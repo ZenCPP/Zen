@@ -19,30 +19,30 @@ namespace zen {
 
   namespace po {
 
-    enum class flag_type {
+    enum class FlagType {
       boolean,
       string,
     };
 
-    class flag {
+    class Flag {
     public:
 
       std::list<std::string> patterns;
-      maybe<std::string> description;
+      Maybe<std::string> description;
       std::size_t min_count = 0;
       std::size_t max_count = 1;
-      maybe<std::string> metavar;
-      flag_type type = flag_type::string;
+      Maybe<std::string> metavar;
+      FlagType type = FlagType::string;
 
-      inline flag(std::initializer_list<std::string> patterns):
+      inline Flag(std::initializer_list<std::string> patterns):
         patterns(patterns) {}
 
-      flag& set_description(std::string new_description) {
+      Flag& set_description(std::string new_description) {
         description = new_description;
         return *this;
       }
 
-      flag& set_nary(bool is_nary) {
+      Flag& set_nary(bool is_nary) {
         if (is_nary) {
           max_count = ZEN_AUTO_SIZE;
         } else {
@@ -51,80 +51,80 @@ namespace zen {
         return *this;
       }
 
-      flag& set_is_bool(bool is_bool) {
+      Flag& set_is_bool(bool is_bool) {
         if (is_bool) {
-          type = flag_type::boolean;
-        } else if (type == flag_type::boolean) {
-          type = flag_type::string;
+          type = FlagType::boolean;
+        } else if (type == FlagType::boolean) {
+          type = FlagType::string;
         }
         return *this;
       }
 
-      flag& set_metavar(std::string new_metavar) {
+      Flag& set_metavar(std::string new_metavar) {
         metavar = new_metavar;
         return *this;
       }
 
     };
 
-    class subcommand {
+    class Subcommand {
     public:
 
       std::string name;
       std::string description;
-      std::list<flag> flags;
+      std::list<Flag> flags;
 
-      subcommand(std::string name): name(name) {}
+      Subcommand(std::string name): name(name) {}
 
-      subcommand& set_description(std::string new_description) {
+      Subcommand& set_description(std::string new_description) {
         description = new_description;
         return *this;
       }
 
-      subcommand& add_flag(flag f) {
+      Subcommand& add_flag(Flag f) {
           flags.push_back(f);
           return *this;
       }
 
     };
 
-    using parsed_options = std::unordered_map<std::string, std::any>;
+    using ParsedOptions = std::unordered_map<std::string, std::any>;
 
-    class program {
+    class Program {
     public:
 
       std::string name;
       std::string description;
       std::string author;
-      sequence_map<std::string, subcommand> subcommands;
-      std::list<flag> flags;
+      sequence_map<std::string, Subcommand> subcommands;
+      std::list<Flag> flags;
 
-      inline program(std::string name): name(name) {}
+      inline Program(std::string name): name(name) {}
 
-      program& set_description(std::string new_description) {
+      Program& set_description(std::string new_description) {
         description = new_description;
         return *this;
       }
 
-      program& set_author(std::string new_author) {
+      Program& set_author(std::string new_author) {
         author = new_author;
         return *this;
       }
 
-      program& add_subcommand(subcommand s) {
+      Program& add_subcommand(Subcommand s) {
         subcommands.emplace(s.name, s);
         return *this;
       }
 
       template<typename ...StringTs>
-      program& add_flag(flag f) {
+      Program& add_flag(Flag f) {
         flags.push_back(f);
         return *this;
       }
 
-      parsed_options parse(int argc, const char* argv) {
-        parsed_options result;
-        for (flag f: flags) {
+      ParsedOptions parse(int argc, const char* argv) {
+        ParsedOptions result;
+        for (Flag f: flags) {
           for (auto pattern: f.patterns) {
             std::size_t k = 0;
             if (pattern.size() > 0 && pattern[0] == '-') {

@@ -12,4 +12,6 @@
 
 #define ZEN_COULD_NOT_OPEN_FILE 1
 
+#define ZEN_NODISCARD [[nodiscard]]
+
 #endif // #ifndef ZEN_CONFIG_H

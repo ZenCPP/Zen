@@ -12,38 +12,38 @@ namespace zen {
 
   namespace fs {
 
-    struct file_handle_t {
+    struct FileHandle {
       int fd;
-      file_handle_t(int fd): fd(fd) {}
-      ~file_handle_t();
+      FileHandle(int fd): fd(fd) {}
+      ~FileHandle();
     };
 
-    file_handle_t::~file_handle_t() {
+    FileHandle::~FileHandle() {
       if (close(fd) < 0) {
         ZEN_PANIC("close() failed for some reason");
       }
     }
 
-    struct file_contents_handle_t {
+    struct FileContentsHandle {
       void* ptr;
       size_t sz;
-      file_contents_handle_t(void* ptr, size_t sz): ptr(ptr), sz(sz) {}
-      ~file_contents_handle_t() {
+      FileContentsHandle(void* ptr, size_t sz): ptr(ptr), sz(sz) {}
+      ~FileContentsHandle() {
         if (munmap(ptr, sz) < 0) {
           ZEN_PANIC("munmap() failed for some reason");
         }
       }
     };
 
-    std::string file_contents::as_string() const {
+    std::string FileContents::as_string() const {
       return std::string((char*)handle->ptr, handle->sz-1);
     }
 
-    std::string_view file_contents::as_string_view() const {
+    std::string_view FileContents::as_string_view() const {
       return std::string_view((char*)handle->ptr, handle->sz-1);
     }
 
-    result<file_contents> file::get_contents() {
+    Result<FileContents> File::get_contents() {
 
       int status;
       struct stat stats;
@@ -58,15 +58,15 @@ namespace zen {
         return zen::left(status);
       }
 
-      return zen::right(file_contents { std::make_shared<file_contents_handle_t>(ptr, stats.st_size) });
+      return zen::right(FileContents { std::make_shared<FileContentsHandle>(ptr, stats.st_size) });
     }
 
-    result<file> file_from_path(path p) {
+    Result<File> file_from_path(Path p) {
       int fd = open(p.c_str(), O_RDONLY);
       if (fd < 0) {
         return left(errno);
       }
-      return right(file { std::make_shared<file_handle_t>(fd) });
+      return right(File { std::make_shared<FileHandle>(fd) });
     }
 
   }

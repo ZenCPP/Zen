@@ -7,8 +7,10 @@
 
 namespace zen {
 
+  struct Empty {};
+
   template<typename T>
-  class maybe {
+  class Maybe {
 
     bool has_value;
 
@@ -18,23 +20,26 @@ namespace zen {
 
   public:
 
-    inline maybe():
+    inline Maybe():
       has_value(false) {}
 
-    inline maybe(T&& value):
+    inline Maybe(Empty):
+      has_value(false) {}
+
+    inline Maybe(T&& value):
       has_value(true), value(std::move(value)) {}
 
-    inline maybe(T& value):
+    inline Maybe(T& value):
       has_value(true), value(value) {}
 
-    inline maybe(const maybe<T>& other):
+    inline Maybe(const Maybe<T>& other):
       has_value(other.has_value) {
         if (other.has_value) {
           new(&value)T(other.value);
         }
       }
 
-    inline maybe(maybe<T>&& other):
+    inline Maybe(Maybe<T>&& other):
       has_value(std::move(other.has_value)) {
         if (other.has_value) {
           new(&value)T(std::move(other.value));
@@ -42,7 +47,7 @@ namespace zen {
       }
 
     template<typename T2>
-    inline maybe(const maybe<T2>& other):
+    inline Maybe(const Maybe<T2>& other):
       has_value(other.has_value) {
         if (other.has_value) {
           value = other.value;
@@ -50,14 +55,14 @@ namespace zen {
       }
 
     template<typename T2>
-    inline maybe(maybe<T2>&& other):
+    inline Maybe(Maybe<T2>&& other):
       has_value(std::move(other.has_value)) {
         if (has_value) {
           value = std::move(other.value);
         }
       }
 
-    maybe<T>& operator=(const maybe<T>& other) {
+    Maybe<T>& operator=(const Maybe<T>& other) {
       has_value = other.has_value;
       if (has_value) {
         value = other.value;
@@ -65,7 +70,7 @@ namespace zen {
       return *this;
     }
 
-    maybe<T>& operator=(maybe<T>&& other) {
+    Maybe<T>& operator=(Maybe<T>&& other) {
       has_value = std::move(other.has_value);
       if (has_value) {
         new(&value)T(std::move(other.value));
@@ -95,7 +100,7 @@ namespace zen {
       return value;
     }
 
-    ~maybe() {
+    ~Maybe() {
       if (has_value) {
         value.~T();
       }
@@ -104,13 +109,13 @@ namespace zen {
   };
 
   template<typename T>
-  constexpr maybe<T> some(T& value) {
+  constexpr Maybe<T> some(T& value) {
     return value;
   }
 
   template<typename T>
-  constexpr maybe<T> some(T&& value) {
-    return maybe<T> { std::move(value) };
+  constexpr Maybe<T> some(T&& value) {
+    return Maybe<T> { std::move(value) };
   }
 
 }

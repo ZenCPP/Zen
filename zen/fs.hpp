@@ -12,26 +12,26 @@ namespace zen {
   namespace fs {
 
     template<typename T>
-    using result = either<int, T>;
+    using Result = Either<int, T>;
 
-    using path = std::string;
+    using Path = std::string;
 
-    class file;
+    class File;
 
-    struct file_handle_t;
-    struct file_contents_handle_t;
+    struct FileHandle;
+    struct FileContentsHandle;
 
     /// @brief Represents the contents of an open file
     ///
     /// This class efficiently shares resources with its clones so that the file
     /// needs to be mapped into memory only once.
-    class file_contents {
+    class FileContents {
 
-      friend class file;
+      friend class File;
 
-      std::shared_ptr<file_contents_handle_t> handle;
+      std::shared_ptr<FileContentsHandle> handle;
 
-      inline file_contents(std::shared_ptr<file_contents_handle_t> handle):
+      inline FileContents(std::shared_ptr<FileContentsHandle> handle):
         handle(handle) {}
 
     public:
@@ -49,13 +49,13 @@ namespace zen {
     ///
     /// This class cannot be directly constructed. Instead, you should obtain a
     /// copy from a function such as `path::open`.
-    class file {
+    class File {
 
-      friend result<file> file_from_path(path p);
+      friend Result<File> file_from_path(Path p);
 
-      std::shared_ptr<file_handle_t> handle;
+      std::shared_ptr<FileHandle> handle;
 
-      inline file(std::shared_ptr<file_handle_t> handle):
+      inline File(std::shared_ptr<FileHandle> handle):
         handle(handle) {}
 
     public:
@@ -65,13 +65,13 @@ namespace zen {
       /// This method will try to use the operating system's best available APIs
       /// to map the file into memory, falling back to a full scan if no
       /// specialised functions exist.
-      result<file_contents> get_contents();
+      Result<FileContents> get_contents();
 
     };
 
-    result<std::string> read_file(path p);
+    Result<std::string> read_file(Path p);
 
-    result<file> file_from_path(path p);
+    Result<File> file_from_path(Path p);
 
   }
 
