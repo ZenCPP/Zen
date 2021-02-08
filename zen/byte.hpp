@@ -5,7 +5,7 @@ namespace zen {
 
   using Byte = unsigned char;
 
-#define ZEN_BYTE_LITERAL(literal) ((const byte_t*)(literal))
+#define ZEN_BYTE_LITERAL(literal) ((const Byte*)(literal))
 
 }
 
