@@ -175,6 +175,24 @@ namespace zen {
       }
     }
 
+    either<L, R>& operator=(const either<L, R>& other) {
+      if (has_right_v) {
+        new(&right_value)R(other.right_value);
+      } else {
+        new(&left_value)L(other.left_value);
+      }
+      return *this;
+    }
+
+    either<L, R>& operator=(either<L, R>&& other) {
+      if (has_right_v) {
+        new(&right_value)R(std::move(other.right_value));
+      } else {
+        new(&left_value)L(std::move(other.left_value));
+      }
+      return *this;
+    }
+
     R* operator->() {
       ZEN_ASSERT(has_right_v);
       return &right_value;
@@ -247,7 +265,7 @@ namespace zen {
     bool is_left() { return has_left; }
     bool is_right() { return !has_left; }
 
-    L& left() const {
+    L& left() {
       ZEN_ASSERT(has_left);
       return left_value;
     }
