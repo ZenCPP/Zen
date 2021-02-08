@@ -30,7 +30,7 @@ namespace zen {
   public:
 
     /// @brief Get some token in the stream without consuming any
-    virtual maybe<T> peek(SizeT offset = 0);
+    virtual maybe<T> peek(SizeT offset = 0) = 0;
 
   };
 
@@ -66,6 +66,44 @@ namespace zen {
         buffer.push_back(token);
       }
       return some(buffer[offset-1]);
+    }
+
+  };
+
+
+  template<typename ContainerT>
+  class stream_wrapper : public peek_stream<typename ContainerT::value_type> {
+  public:
+
+    using size_type = typename ContainerT::size_type;
+    using value_type = typename ContainerT::value_type;
+
+  private:
+
+    ContainerT& data;
+    size_type offset;
+
+  public:
+
+    stream_wrapper(ContainerT& data, size_type offset = 0):
+      data(data), offset(offset) {}
+
+    maybe<value_type> get() override {
+      if (offset < data.size()) {
+        return data[offset++];
+      } else {
+        return {};
+      }
+    }
+
+    maybe<value_type> peek(size_type lookahead_offset) override {
+      auto real_offset = offset + lookahead_offset;
+      if (real_offset < data.size()) {
+        return data[real_offset];
+      } else {
+        return {};
+      }
+
     }
 
   };
