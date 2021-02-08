@@ -42,11 +42,11 @@ will be constructed, and that the caller is responsible for its ownership.
 
 ## Template metaprogramming
 
-### Use CamelCase for template parameters
+### Use `CamelCase` for template parameters
 
-Given that almost everything else is in `snake_case`, this makes it very easy
-to spot parametrised types. Moreover, this convention ensures we are in line
-with the conventions that are used in the standard library.
+**Motivation:** type variables are substituted for regular types, so they exist
+on roughly the same level as types, classes and concepts. Using the same
+convention for type variables ensures that developers can easily spot them.
 
 ### Template metafunctions should be suffixed with `_`
 
