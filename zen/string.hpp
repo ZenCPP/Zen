@@ -42,6 +42,18 @@ namespace zen {
 
   };
 
+  // FIXME Currently only works for ASCII values.
+  inline string from_utf8(std::string_view raw) {
+    return string { raw.begin(), raw.end() };
+  }
+
+  template<std::size_t N>
+  inline string from_utf8(const char ptr[N]) {
+    return string { ptr, ptr + N };
+  }
+
+#define ZEN_STRING_LITERAL(literal) ::zen::from_utf8(literal)
+
 }
 
 #endif // of #ifndef ZEN_STRING_HPP
