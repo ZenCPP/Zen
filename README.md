@@ -1,7 +1,7 @@
 Zen C++ Libraries
 =================
 
-<img src="https://raw.githubusercontent.com/ZenLibraries/Zen/master/zen-logo.png" height="250" />
+<img src="https://raw.githubusercontent.com/ZenLibraries/ZenLibraries/master/zen-logo.png" height="250" />
 
 The Zen C++ libraries are a set of C++ headers that aim to partially replace
 the C++ standard library. The libraries try to fill missing pieces in the
@@ -56,6 +56,6 @@ See [the LICENSE file][3] for more information.
 
 [1]: https://zencpp.github.io/
 [2]: http://www.doxygen.nl/
-[3]: https://github.com/ZenLibraries/Zen/blob/master/LICENSE
+[3]: https://github.com/ZenLibraries/ZenLibraries/blob/master/LICENSE
 
 
