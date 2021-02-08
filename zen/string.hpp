@@ -31,15 +31,21 @@ namespace zen {
     inline Maybe(Glyph value):
       value(value) {}
 
-    Glyph* operator->() {
-      return &value;
+    Glyph& operator*() {
+      ZEN_ASSERT(value != eof);
+      return value;
     }
 
-    bool is_some() {
+    const Glyph& operator*() const {
+      ZEN_ASSERT(value != eof);
+      return value;
+    }
+
+    bool is_some() const {
       return value != eof;
     }
 
-    bool is_empty() {
+    bool is_empty() const {
       return value == eof;
     }
 
