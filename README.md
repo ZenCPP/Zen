@@ -25,9 +25,9 @@ folder called `vendor/zen`).
 ```cmake
 add_subdirectory(vendor/zen EXCLUDE_FROM_ALL)
 
-# ...
+add_executable(myapp src/main.cc)
 
-target_link_libraries(myapp zen_base)
+target_link_libraries(myapp zen::zen)
 ```
 
 **meson.build**
