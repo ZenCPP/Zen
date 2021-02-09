@@ -48,7 +48,7 @@ properly, you might want to use the following.
 ```cmake
 cmake_minimum_required(VERSION 3.10)
 
-project(Zen CXX)
+project(MyApp CXX)
 
 # This will overwrite any value that might previously have been set.
 set(ZEN_NAMESPACE myapp::zen CACHE INTERNAL "The Zen++ namespace this project will use" FORCE)
