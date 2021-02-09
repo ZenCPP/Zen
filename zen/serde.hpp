@@ -8,10 +8,10 @@
 namespace zen {
 
   template<typename T>
-  value serialize(const T& obj) {
-    zen::object out;
-    for (auto& [name, lens]: reflection<T>::value) {
-      out.add_prop(name, get(obj, lens));
+  Value serialize(const T& obj) {
+    Object out;
+    for (auto& [name, lens]: get_reflection<T>()) {
+      out.set_property(name, get(obj, lens));
     };
     return out;
   }

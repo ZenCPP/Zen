@@ -21,6 +21,11 @@ libraries is by downloading a recent tarball of the repository's source and
 checking in the sources into your project's version control system (e.g. in a
 folder called `vendor/zen`).
 
+**It is highly recommended to define a custom Zen++ namespace.** Doing so will
+avoid conflicts with dependencies that use a different version of these
+libraries. For instance, if your project has a namespace `myapp`, you would
+define the Zen namespace as `myapp::zen`.
+
 **CMakeLists.txt**
 ```cmake
 add_subdirectory(vendor/zen EXCLUDE_FROM_ALL)

@@ -39,29 +39,29 @@
     } \
   }
 
-namespace zen {
+ZEN_NAMESPACE_START
 
-  template<typename T>
-  struct Bindings;
+template<typename T>
+struct Bindings;
 
-  template<typename T>
-  struct IsPoly {
-    static constexpr const bool value = false;
-  };
+template<typename T>
+struct IsPoly {
+  static constexpr const bool value = false;
+};
 
-  template<typename T>
-  struct TypeOfKind {
-    using type = int;
-  };
+template<typename T>
+struct TypeOfKind {
+  using type = int;
+};
 
-  template<typename T>
-  struct IsOfType {
-    template<typename R>
-    static bool apply(const T& value) {
-      return false;
-    }
-  };
+template<typename T>
+struct IsOfType {
+  template<typename R>
+  static bool apply(const T& value) {
+    return false;
+  }
+};
 
-} // of namespace zen
+ZEN_NAMESPACE_END
 
 #endif // #ifndef ZEN_MATCH_HPP

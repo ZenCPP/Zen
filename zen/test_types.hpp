@@ -5,36 +5,36 @@
 
 namespace zen {
 
-  class point {
+  class Point {
   public:
 
     int x;
     int y;
 
-    inline point(int x, int y):
-      x(x), y(y) {};
+    inline Point(int x, int y):
+      x(x), y(y) {}
 
-    inline point(point&& other):
-      x(std::move(other.x)), y(std::move(other.y)) {};
-  
-    inline point(const point& other):
-      x(other.x), y(other.y) {};
+    inline Point(const Point& other):
+      x(other.x), y(other.y) {}
+
+    inline Point(Point&& other):
+      x(std::move(other.x)), y(std::move(other.y)) {}
 
   };
 
-  class shape {
+  class Shape {
   public:
-    virtual ~shape() {};
+    virtual ~Shape() {}
   };
 
-  class rect : public shape {
+  class Rect : public Shape {
   public:
 
     int width;
     int height;
 
-    rect(int width, int height):
-      width(width), height(height) {};
+    Rect(int width, int height):
+      width(width), height(height) {}
 
    };
 

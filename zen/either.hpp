@@ -96,57 +96,58 @@
 #include <type_traits>
 #include <utility>
 
+#include "zen/config.h"
 #include "zen/macros.h"
 
-namespace zen {
+ZEN_NAMESPACE_START
 
-  template<typename L>
-  struct Left {
-    L value;
-    inline Left(L value): value(std::move(value)) {};
+template<typename L>
+struct Left {
+  L value;
+  inline Left(L value): value(std::move(value)) {};
+};
+
+template<typename R>
+struct Right {
+  R value;
+  inline Right(R&& value): value(std::move(value)) {};
+  inline Right(const R& value): value(value) {};
+};
+
+template<>
+struct Right<void> {};
+
+template<typename L, typename R>
+class Either {
+
+  template<typename L2, typename R2>
+  friend
+  class either;
+
+  struct dummy {};
+
+  union {
+    L left_value;
+    R right_value;
   };
 
-  template<typename R>
-  struct Right {
-    R value;
-    inline Right(R&& value): value(std::move(value)) {};
-    inline Right(const R& value): value(value) {};
-  };
+  bool has_right_v;
 
-  template<>
-  struct Right<void> {};
+public:
 
-  template<typename L, typename R>
-  class Either {
+  template<typename L2>
+  inline Either(Left<L2>&& value): left_value(std::move(value.value)), has_right_v(false) {};
 
-    template<typename L2, typename R2>
-    friend
-    class either;
+  template<typename R2>
+  inline Either(Right<R2>&& value): right_value(std::move(value.value)), has_right_v(true) {};
 
-    struct dummy {};
-
-    union {
-      L left_value;
-      R right_value;
-    };
-
-    bool has_right_v;
-
-  public:
-
-    template<typename L2>
-    inline Either(Left<L2>&& value): left_value(std::move(value.value)), has_right_v(false) {};
-
-    template<typename R2>
-    inline Either(Right<R2>&& value): right_value(std::move(value.value)), has_right_v(true) {};
-
-    Either(Either &&other) : has_right_v(std::move(other.has_right_v)) {
-      if (has_right_v) {
-        new(&right_value)R(std::move(other.right_value));
-      } else {
-        new(&left_value)L(std::move(other.left_value));
-      }
+  Either(Either &&other) : has_right_v(std::move(other.has_right_v)) {
+    if (has_right_v) {
+      new(&right_value)R(std::move(other.right_value));
+    } else {
+      new(&left_value)L(std::move(other.left_value));
     }
+  }
 
 //    either(const either &other) : has_right_v(other.has_right_v) {
 //      if (has_right_v) {
@@ -156,151 +157,151 @@ namespace zen {
 //      }
 //    }
 
-    template<typename L2, typename R2>
-    Either(Either<L2, R2>&& other): has_right_v(std::move(other.has_right_v)) {
-      if (has_right_v) {
-        new(&right_value)R(std::move(other.right_value));
-      } else {
-        new(&left_value)L(std::move(other.left_value));
-      }
+  template<typename L2, typename R2>
+  Either(Either<L2, R2>&& other): has_right_v(std::move(other.has_right_v)) {
+    if (has_right_v) {
+      new(&right_value)R(std::move(other.right_value));
+    } else {
+      new(&left_value)L(std::move(other.left_value));
     }
+  }
 
-    template<typename L2, typename R2>
-    Either(const Either<L2, R2> &other): has_right_v(other.has_right_v) {
-      if (has_right_v) {
-        new(&right_value)R(other.right_value);
-      } else {
-        new(&left_value)L(other.left_value);
-      }
+  template<typename L2, typename R2>
+  Either(const Either<L2, R2> &other): has_right_v(other.has_right_v) {
+    if (has_right_v) {
+      new(&right_value)R(other.right_value);
+    } else {
+      new(&left_value)L(other.left_value);
     }
+  }
 
-    Either<L, R>& operator=(const Either<L, R>& other) {
-      if (has_right_v) {
-        new(&right_value)R(other.right_value);
-      } else {
-        new(&left_value)L(other.left_value);
-      }
-      return *this;
+  Either<L, R>& operator=(const Either<L, R>& other) {
+    if (has_right_v) {
+      new(&right_value)R(other.right_value);
+    } else {
+      new(&left_value)L(other.left_value);
     }
+    return *this;
+  }
 
-    Either<L, R>& operator=(Either<L, R>&& other) {
-      if (has_right_v) {
-        new(&right_value)R(std::move(other.right_value));
-      } else {
-        new(&left_value)L(std::move(other.left_value));
-      }
-      return *this;
+  Either<L, R>& operator=(Either<L, R>&& other) {
+    if (has_right_v) {
+      new(&right_value)R(std::move(other.right_value));
+    } else {
+      new(&left_value)L(std::move(other.left_value));
     }
+    return *this;
+  }
 
-    R* operator->() {
-      ZEN_ASSERT(has_right_v);
-      return &right_value;
+  R* operator->() {
+    ZEN_ASSERT(has_right_v);
+    return &right_value;
+  }
+
+  R &operator*() {
+    ZEN_ASSERT(has_right_v);
+    return right_value;
+  }
+
+  bool is_left() { return !has_right_v; }
+
+  bool is_right() { return has_right_v; }
+
+  R unwrap() {
+    if (!has_right_v) {
+      ZEN_PANIC("trying to unwrap a zen::either which is left-valued");
     }
+    return right_value;
+  }
 
-    R &operator*() {
-      ZEN_ASSERT(has_right_v);
-      return right_value;
+  L &left() {
+    ZEN_ASSERT(!has_right_v);
+    return left_value;
+  }
+
+  R &right() {
+    ZEN_ASSERT(has_right_v);
+    return right_value;
+  }
+
+  ~Either() {
+    if (has_right_v) {
+      right_value.~R();
+    } else {
+      left_value.~L();
     }
+  }
 
-    bool is_left() { return !has_right_v; }
+};
 
-    bool is_right() { return has_right_v; }
+template<typename L>
+class Either<L, void> {
 
-    R unwrap() {
-      if (!has_right_v) {
-        ZEN_PANIC("trying to unwrap a zen::either which is left-valued");
-      }
-      return right_value;
-    }
+  struct dummy {};
 
-    L &left() {
-      ZEN_ASSERT(!has_right_v);
-      return left_value;
-    }
-
-    R &right() {
-      ZEN_ASSERT(has_right_v);
-      return right_value;
-    }
-
-    ~Either() {
-      if (has_right_v) {
-        right_value.~R();
-      } else {
-        left_value.~L();
-      }
-    }
-
+  union {
+    L left_value;
   };
 
-  template<typename L>
-  class Either<L, void> {
+  bool has_left;
 
-    struct dummy {};
+public:
 
-    union {
-      L left_value;
-    };
+  inline Either(Left<L> data): left_value(data.value), has_left(true) {};
+  inline Either(Right<void>): has_left(false) {};
 
-    bool has_left;
-
-  public:
-
-    inline Either(Left<L> data): left_value(data.value), has_left(true) {};
-    inline Either(Right<void>): has_left(false) {};
-
-    Either(Either&& other): has_left(other.has_left) {
-      if (other.has_left) {
-        left_value = std::move(other.data.left);
-      }
+  Either(Either&& other): has_left(other.has_left) {
+    if (other.has_left) {
+      left_value = std::move(other.data.left);
     }
+  }
 
-    Either(const Either& other): has_left(other.has_left) {
-      if (other.has_left) {
-        left_value = other.data.left;
-      }
+  Either(const Either& other): has_left(other.has_left) {
+    if (other.has_left) {
+      left_value = other.data.left;
     }
+  }
 
-    bool is_left() { return has_left; }
-    bool is_right() { return !has_left; }
+  bool is_left() { return has_left; }
+  bool is_right() { return !has_left; }
 
-    L& left() {
-      ZEN_ASSERT(has_left);
-      return left_value;
+  L& left() {
+    ZEN_ASSERT(has_left);
+    return left_value;
+  }
+
+  ~Either() {
+    if (has_left) {
+      left_value.~L();
     }
-
-    ~Either() {
-      if (has_left) {
-        left_value.~L();
-      }
-    }
-
-  };
-
-  template<typename L>
-  Left<L> left(L& value) {
-    return Left<L> { value };
   }
 
-  template<typename L>
-  Left<L> left(L&& value) {
-    return Left<L> { std::move(value) };
-  }
+};
 
-  /// Construct a right-valued either type that has no contents.
-  inline Right<void> right() {
-    return Right<void> {};
-  }
+template<typename L>
+Left<L> left(L& value) {
+  return Left<L> { value };
+}
 
-  template<typename R>
-  Right<R> right(R& value) {
-    return Right<R> { value };
-  }
+template<typename L>
+Left<L> left(L&& value) {
+  return Left<L> { std::move(value) };
+}
 
-  template<typename R>
-  Right<R> right(R&& value) {
-    return Right<R> { std::move(value) };
-  }
+/// Construct a right-valued either type that has no contents.
+inline Right<void> right() {
+  return Right<void> {};
+}
+
+template<typename R>
+Right<R> right(R& value) {
+  return Right<R> { value };
+}
+
+template<typename R>
+Right<R> right(R&& value) {
+  return Right<R> { std::move(value) };
+}
 
 #define ZEN_TRY(value) \
   { \
@@ -317,11 +318,6 @@ namespace zen {
     } \
   }
 
-#define ZEN_UNWRAP(value) \
-  if (value.is_left()) { \
-    ZEN_PANIC("unwrapping a left-valued object"); \
-  }
-
-} // of namespace zen
+ZEN_NAMESPACE_END
 
 #endif // ZEN_EITHER_HPP

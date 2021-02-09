@@ -25,25 +25,27 @@
 #include <stddef.h>
 #include <malloc.h>
 
-namespace zen {
+#include "zen/config.h"
 
-  template<typename T>
-  class SystemAllocator {
-  public:
+ZEN_NAMESPACE_START
 
-    inline T* allocate(size_t sz) {
-      return malloc(sz);
-    }
+template<typename T>
+class SystemAllocator {
+public:
 
-    inline void free(T* ptr, size_t sz) {
-      free(ptr);
-    }
+  inline T* allocate(size_t sz) {
+    return static_cast<T*>(malloc(sz * sizeof(T)));
+  }
 
-  };
+  inline void free(T* ptr, size_t sz) {
+    free(ptr);
+  }
 
-  template<typename T>
-  using DefaultAllocator = SystemAllocator<T>;
+};
 
-}
+template<typename T>
+using DefaultAllocator = SystemAllocator<T>;
+
+ZEN_NAMESPACE_END
 
 #endif // of #ifndef ZEN_ALLOCATOR_HPP

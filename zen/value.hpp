@@ -1,197 +1,200 @@
-
-#ifndef ZEN_CONFIG_HPP
-#define ZEN_CONFIG_HPP
+#ifndef ZEN_VALUE_HPP
+#define ZEN_VALUE_HPP
 
 #include "zen/clone_ptr.hpp"
 #include "zen/sequence_map.hpp"
+#include "zen/string.hpp"
+#include "zen/vector.hpp"
 
-namespace zen {
+ZEN_NAMESPACE_START
 
-  using string = std::string;
-  using decimal = double;
-  using integer = int64_t;
+using Decimal = double;
+using Integer = int64_t;
 
-  class value;
+class Value;
 
-  class array {
+class Array {
 
-    std::vector<value> elements;
+  Vector<Value> elements;
 
-  public:
+public:
 
-    inline array(std::initializer_list<value> elements):
-      elements(elements) {};
+  inline Array(std::initializer_list<Value> elements):
+    elements(elements) {};
 
+};
+
+class Object {
+
+  sequence_map<String, Value> properties;
+
+public:
+
+  inline Object() {};
+
+  inline Object(std::initializer_list<std::pair<const String, Value>> properties):
+    properties(properties) {};
+
+  void set_property(String key, Value value);
+
+
+};
+
+
+enum class ValueType {
+  array,
+  object,
+  string,
+  integer,
+  decimal,
+  boolean,
+};
+
+class Value {
+
+  ValueType kind;
+
+  union {
+    Array a;
+    Object o;
+    String s;
+    Integer i;
+    Decimal d;
+    bool b;
   };
 
-  class object {
+public:
 
-    sequence_map<std::string, value> properties;
+  inline Value(Array&& a): a(std::move(a)) {};
+  inline Value(Object&& o): o(std::move(o)) {};
+  inline Value(String&& s): s(std::move(s)) {};
+  inline Value(Integer&& i): i(std::move(i)) {};
+  inline Value(Decimal&& d): d(std::move(d)) {};
+  inline Value(bool&& b): b(std::move(b)) {};
 
-  public:
+  inline Value(const Array& a): a(std::move(a)) {};
+  inline Value(const Object& o): o(std::move(o)) {};
+  inline Value(const String& s): s(std::move(s)) {};
+  inline Value(const Integer& i): i(std::move(i)) {};
+  inline Value(const Decimal& d): d(std::move(d)) {};
+  inline Value(const bool& b): b(std::move(b)) {};
 
-    inline object() {};
-
-    inline object(std::initializer_list<std::pair<const std::string, value>> properties):
-      properties(properties) {};
-
-  };
-
-
-  enum class value_kind {
-    array,
-    object,
-    string,
-    integer,
-    decimal,
-    boolean,
-  };
-
-  class value {
-
-    value_kind kind;
-
-    union {
-      array a;
-      object o;
-      string s;
-      integer i;
-      decimal d;
-      bool b;
-    };
-
-  public:
-
-    inline value(array&& a): a(std::move(a)) {};
-    inline value(object&& o): o(std::move(o)) {};
-    inline value(string&& s): s(std::move(s)) {};
-    inline value(integer&& i): i(std::move(i)) {};
-    inline value(decimal&& d): d(std::move(d)) {};
-    inline value(bool&& b): b(std::move(b)) {};
-
-    inline value(const array& a): a(std::move(a)) {};
-    inline value(const object& o): o(std::move(o)) {};
-    inline value(const string& s): s(std::move(s)) {};
-    inline value(const integer& i): i(std::move(i)) {};
-    inline value(const decimal& d): d(std::move(d)) {};
-    inline value(const bool& b): b(std::move(b)) {};
-
-    value(value&& other) {
-      switch (kind) {
-        case value_kind::object:
-          o = std::move(other.o);
-          break;
-        case value_kind::array:
-          a = std::move(other.a);
-          break;
-        case value_kind::integer:
-          i = std::move(other.i);
-          break;
-        case value_kind::string:
-          s = std::move(other.s);
-          break;
-        case value_kind::decimal:
-          d = std::move(other.d);
-          break;
-        case value_kind::boolean:
-          b = std::move(other.b);
-          break;
-      }
+  Value(Value&& other) {
+    switch (kind) {
+      case ValueType::object:
+        o = std::move(other.o);
+        break;
+      case ValueType::array:
+        a = std::move(other.a);
+        break;
+      case ValueType::integer:
+        i = std::move(other.i);
+        break;
+      case ValueType::string:
+        s = std::move(other.s);
+        break;
+      case ValueType::decimal:
+        d = std::move(other.d);
+        break;
+      case ValueType::boolean:
+        b = std::move(other.b);
+        break;
     }
+  }
 
-    value(const value& other) {
-      switch (kind) {
-        case value_kind::object:
-          o = other.o;
-          break;
-        case value_kind::array:
-          a = other.a;
-          break;
-        case value_kind::integer:
-          i = other.i;
-          break;
-        case value_kind::string:
-          s = other.s;
-          break;
-        case value_kind::decimal:
-          d = other.d;
-          break;
-        case value_kind::boolean:
-          b = other.b;
-          break;
-      }
+  Value(const Value& other) {
+    switch (kind) {
+      case ValueType::object:
+        o = other.o;
+        break;
+      case ValueType::array:
+        a = other.a;
+        break;
+      case ValueType::integer:
+        i = other.i;
+        break;
+      case ValueType::string:
+        s = other.s;
+        break;
+      case ValueType::decimal:
+        d = other.d;
+        break;
+      case ValueType::boolean:
+        b = other.b;
+        break;
     }
+  }
 
-    value& operator=(value&& other) {
-      switch (kind) {
-        case value_kind::object:
-          o = std::move(other.o);
-          break;
-        case value_kind::array:
-          a = std::move(other.a);
-          break;
-        case value_kind::integer:
-          i = std::move(other.i);
-          break;
-        case value_kind::string:
-          s = std::move(other.s);
-          break;
-        case value_kind::decimal:
-          d = std::move(other.d);
-          break;
-        case value_kind::boolean:
-          b = std::move(other.b);
-          break;
-      }
-      return *this;
+  Value& operator=(Value&& other) {
+    switch (kind) {
+      case ValueType::object:
+        o = std::move(other.o);
+        break;
+      case ValueType::array:
+        a = std::move(other.a);
+        break;
+      case ValueType::integer:
+        i = std::move(other.i);
+        break;
+      case ValueType::string:
+        s = std::move(other.s);
+        break;
+      case ValueType::decimal:
+        d = std::move(other.d);
+        break;
+      case ValueType::boolean:
+        b = std::move(other.b);
+        break;
     }
+    return *this;
+  }
 
-    value& operator=(const value& other) {
-      switch (kind) {
-        case value_kind::object:
-          o = other.o;
-          break;
-        case value_kind::array:
-          a = other.a;
-          break;
-        case value_kind::integer:
-          i = other.i;
-          break;
-        case value_kind::string:
-          s = other.s;
-          break;
-        case value_kind::decimal:
-          d = other.d;
-          break;
-        case value_kind::boolean:
-          b = other.b;
-          break;
-      }
-      return *this;
+  Value& operator=(const Value& other) {
+    switch (kind) {
+      case ValueType::object:
+        o = other.o;
+        break;
+      case ValueType::array:
+        a = other.a;
+        break;
+      case ValueType::integer:
+        i = other.i;
+        break;
+      case ValueType::string:
+        s = other.s;
+        break;
+      case ValueType::decimal:
+        d = other.d;
+        break;
+      case ValueType::boolean:
+        b = other.b;
+        break;
     }
+    return *this;
+  }
 
-    ~value() {
-      switch (kind) {
-        case value_kind::array:
-          a.~array();
-          break;
-        case value_kind::object:
-          o.~object();
-          break;
-        case value_kind::string:
-          s.~string();
-          break;
-        case value_kind::integer:
-          break;
-        case value_kind::decimal:
-          break;
-        case value_kind::boolean:
-          break;
-      }
+  ~Value() {
+    switch (kind) {
+      case ValueType::array:
+        a.~Array();
+        break;
+      case ValueType::object:
+        o.~Object();
+        break;
+      case ValueType::string:
+        s.~String();
+        break;
+      case ValueType::integer:
+        break;
+      case ValueType::decimal:
+        break;
+      case ValueType::boolean:
+        break;
     }
+  }
 
-  };
+};
 
-}
+ZEN_NAMESPACE_END
 
-#endif // ZEN_CONFIG_HPP
+#endif // ZEN_VALUE_HPP

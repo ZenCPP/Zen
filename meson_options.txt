@@ -1,0 +1,2 @@
+option('assertions', type: 'boolean', value: true)
+option('namespace', type: 'string', value: 'zen')
