@@ -63,7 +63,7 @@ target_link_libraries(myapp zen)
 ## Documentation
 
 Documentation will soon be available on [the official website][1]. For now, you
-will have to consult the header files in `include/zen/` to learn more.
+will have to consult the header files in `zen/` to learn more.
 Alternatively, you can try to build the documentation locally using [Doxygen][2].
 
 ## License
