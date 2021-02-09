@@ -46,7 +46,7 @@ properly, you might want to use the following.
 
 **CMakeLists.txt**
 ```cmake
-cmake_minum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.10)
 
 project(Zen CXX)
 
