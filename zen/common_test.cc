@@ -5,7 +5,7 @@
 
 #include "zen/test_types.hpp"
 
-using namespace zen;
+using namespace ZEN_NAMESPACE;
 
 TEST(Clone, CanCloneSharedPtr) {
   auto ptr1 = std::make_shared<Rect>(500,100);

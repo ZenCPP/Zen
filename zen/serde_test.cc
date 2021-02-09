@@ -5,7 +5,7 @@
 #include "zen/serde.hpp"
 #include "zen/test_types.hpp"
 
-using namespace zen;
+using namespace ZEN_NAMESPACE;
 
 ZEN_DECLARE_FIELD(Point, x)
 ZEN_DECLARE_FIELD(Point, y)

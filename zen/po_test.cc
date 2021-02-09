@@ -4,8 +4,8 @@
 
 #include "zen/po.hpp"
 
-using namespace zen;
-using namespace zen::po;
+using namespace ZEN_NAMESPACE;
+using namespace ZEN_NAMESPACE::po;
 
 TEST(POTest, FullExample) {
 

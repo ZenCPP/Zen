@@ -3,7 +3,7 @@
 
 #include "zen/vector.hpp"
 
-using namespace zen;
+using namespace ZEN_NAMESPACE;
 
 TEST(VectorTest, GrowsWhenInsertingElements) {
   Vector<int> v1(4);

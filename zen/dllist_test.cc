@@ -3,7 +3,7 @@
 
 #include "zen/dllist.hpp"
 
-using namespace zen;
+using namespace ZEN_NAMESPACE;
 
 TEST(DLListTest, ReportsCorrectSize) {
   DLList<int> l1;

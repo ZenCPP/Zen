@@ -1,7 +1,7 @@
 
 #include "zen/meta.hpp"
 
-using namespace zen;
+using namespace ZEN_NAMESPACE;
 
 static_assert(zen::size_v<list_t<u1_, u2_>> == 2);
 

@@ -3,8 +3,8 @@
 
 #include "zen/fs.hpp"
 
-using namespace zen;
-using namespace zen::fs;
+using namespace ZEN_NAMESPACE;
+using namespace ZEN_NAMESPACE::fs;
 
 static constexpr std::string_view LOREM_IPSUM = 
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus vestibulum\n"

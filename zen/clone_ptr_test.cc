@@ -4,7 +4,7 @@
 #include "zen/test_types.hpp"
 #include "zen/clone_ptr.hpp"
 
-using namespace zen;
+using namespace ZEN_NAMESPACE;
 
 TEST(clone_ptr, CanPassSimpleStructByValue) {
   clone_ptr<Point> p1 = make_clonable<Point>(1, 2);
