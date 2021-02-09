@@ -20,6 +20,12 @@ foreach name : zen_namespace.split('::')
   zen_namespace_end += '}'
 endforeach
 
+zen_lexgen_sources = [
+  'zen/lexgen/parser.cc',
+  'zen/lexgen/lexer.cc',
+  'zen/lexgen/minimize.cc',
+]
+
 if target_machine.system() == 'linux'
   zen_sources += [
     'zen/fs_posix.cc'
@@ -50,13 +56,23 @@ zen_dep = declare_dependency(
 )
 
 executable(
+  'zen-lexgen',
+  'zen/lexgen/main.cc',
+  zen_lexgen_sources,
+  link_with: zen_lib,
+  include_directories: '.',
+  override_options: ['cpp_std=c++17'],
+)
+
+executable(
   'po-example',
   'zen/po_sample_main.cc',
   link_with: zen_lib,
   override_options: ['cpp_std=c++17'],
+  build_by_default: false,
 )
 
-alltests = executable(
+executable(
   'alltests',
   'zen/meta_test.cc',
   'zen/common_test.cc',
@@ -66,9 +82,12 @@ alltests = executable(
   'zen/clone_ptr_test.cc',
   'zen/fs_test.cc',
   'zen/po_test.cc',
+  'zen/lexgen/lexer_test.cc',
+  zen_lexgen_sources,
   include_directories: '.',
   cpp_args: [ '-Wall' ],
   dependencies: [ zen_dep, gtest_dep, gtest_main_dep ],
   override_options: ['cpp_std=c++17'],
+  build_by_default: false,
 )
 

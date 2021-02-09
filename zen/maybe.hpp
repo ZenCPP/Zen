@@ -3,6 +3,7 @@
 
 #include <utility>
 
+#include "zen/config.h"
 #include "zen/macros.h"
 
 ZEN_NAMESPACE_START
