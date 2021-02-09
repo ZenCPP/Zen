@@ -1,7 +1,8 @@
 
 all: cmake meson
 
-files:
+.PHONY: sync
+sync :
 	mkdir -p subprojects/zen
 	cp -ra ../CMakeLists.txt ../meson.build ../meson_options.txt ../zen subprojects/zen
 	cd subprojects/zen && meson wrap install gtest
@@ -14,7 +15,7 @@ meson:
 
 .PHONY: cmake
 cmake:
-	cmake -B cmake-build -G Ninja -DZEN_NAMESPACE=myapp::zen
+	cmake -B cmake-build -G Ninja
 	ninja -C cmake-build
 	rm -r cmake-build
 
