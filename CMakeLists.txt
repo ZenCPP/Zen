@@ -56,7 +56,7 @@ target_compile_definitions(
 )
 target_include_directories(
   zen
-  INTERFACE
+  PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCDIR}>
 )
@@ -68,7 +68,7 @@ install(
   FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
 )
 install(TARGETS zen EXPORT Zen)
-install(EXPORT Zen DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake")
+install(EXPORT Zen NAMESPACE "${ZEN_NAMESPACE}::" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Zen")
 
 if (ZEN_ENABLE_TESTS)
   add_executable(alltests zen/macros_test.cc zen/clone_ptr_test.cc zen/cli_test.cc)
