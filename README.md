@@ -18,31 +18,46 @@ your code regularly when upgrading.
 
 We support Meson and CMake. Currently, the preferred method for using these
 libraries is by downloading a recent tarball of the repository's source and
-checking in the sources into your project's version control system (e.g. in a
-folder called `vendor/zen`).
+checking in the sources into your project's version control system.
 
 **It is highly recommended to define a custom Zen++ namespace.** Doing so will
 avoid conflicts with dependencies that use a different version of these
 libraries. For instance, if your project has a namespace `myapp`, you would
 define the Zen namespace as `myapp::zen`.
 
-**CMakeLists.txt**
-```cmake
-add_subdirectory(vendor/zen EXCLUDE_FROM_ALL)
-
-add_executable(myapp src/main.cc)
-
-target_link_libraries(myapp zen::zen)
-```
+Meson is the recommended choice for setting up your project. Download a tarball
+of this repository and drop the contents in `subprojects/zen`. Next, adjust the
+following example to match your project setup.
 
 **meson.build**
 ```meson
 project('myproject', 'cxx')
 
-zen_proj = subproject('zen')
+zen_proj = subproject('zen', default_options: ['namespace=myapp::zen'])
 zen_dep = zen_proj.get_variable('zen_dep')
 
 executable('myapp', dependencies: zen_dep)
+```
+
+CMake is also supported, although we really recommend using Meson. CMake does
+not play nice with in-source subprojects because there's no elegant way to
+emulate Meson's `default_options`. Until we have figured out how to do it
+properly, you might want to use the following.
+
+**CMakeLists.txt**
+```cmake
+cmake_minum_required(VERSION 3.10)
+
+project(Zen CXX)
+
+# This will overwrite any value that might previously have been set.
+set(ZEN_NAMESPACE myapp::zen CACHE INTERNAL "The Zen++ namespace this project will use" FORCE)
+
+add_subdirectory(third_party/zen EXCLUDE_FROM_ALL)
+
+add_executable(myapp src/main.cc)
+
+target_link_libraries(myapp zen)
 ```
 
 ## Documentation
