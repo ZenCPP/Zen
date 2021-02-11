@@ -30,10 +30,9 @@ class PeekStream : public Stream<T> {
 public:
 
   /// @brief Get some token in the stream without consuming any
-  virtual Maybe<T> peek(SizeT offset = 0) = 0;
+  virtual Maybe<T> peek(SizeT offset = 1) = 0;
 
 };
-
 
 template<typename T, typename SizeT = std::size_t>
 class BufferedStream : public PeekStream<T, SizeT> {
@@ -97,7 +96,7 @@ public:
   }
 
   Maybe<value_type> peek(size_type lookahead_offset) override {
-    auto real_offset = offset + lookahead_offset;
+    auto real_offset = offset + lookahead_offset - 1;
     if (real_offset < data.size()) {
       return data[real_offset];
     } else {
