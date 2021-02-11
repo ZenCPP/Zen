@@ -63,6 +63,20 @@ inline String from_utf8(const char ptr[N]) {
   return String { ptr, ptr + N };
 }
 
+
+inline bool is_alpha(Glyph ch) {
+  return (ch >= 65 && ch <= 90) || (ch >= 96 && ch <= 122);
+}
+
+inline bool is_numeric(Glyph ch) {
+  return ch >= 48 && ch <= 57;
+}
+
+inline bool is_alnum(Glyph ch) {
+  return is_alpha(ch) || is_numeric(ch);
+}
+
+
 #define ZEN_STRING_LITERAL(literal) ::zen::from_utf8(literal)
 
 ZEN_NAMESPACE_END
