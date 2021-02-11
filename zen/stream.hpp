@@ -107,6 +107,11 @@ public:
 
 };
 
+template<typename ContainerT>
+inline StreamWrapper<ContainerT> make_stream(ContainerT& data, typename ContainerT::size_type offset = 0) {
+  return StreamWrapper<ContainerT>(data);
+}
+
 ZEN_NAMESPACE_END
 
 #endif // of #ifndef ZEN_STREAM_HPP
