@@ -6,7 +6,7 @@
 ZEN_NAMESPACE_START
 
 template<typename ...Ts>
-using variant = std::variant<Ts...>;
+using Variant = std::variant<Ts...>;
 
 ZEN_NAMESPACE_END
 
