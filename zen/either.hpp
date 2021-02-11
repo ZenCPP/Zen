@@ -304,10 +304,8 @@ Right<R> right(R&& value) {
 }
 
 #define ZEN_TRY(value) \
-  { \
-    if (value.is_left()) { \
-      return ::zen::left(std::move(value.left())); \
-    } \
+  if (value.is_left()) { \
+    return ::zen::left(std::move(value.left())); \
   }
 
 #define ZEN_TRY2(expr) \
