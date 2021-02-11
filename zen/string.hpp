@@ -12,6 +12,7 @@ ZEN_NAMESPACE_START
 using Glyph = char32_t;
 
 inline constexpr const Glyph eof = 0xFFFF;
+inline constexpr const Glyph invalid = 0xFFFE;
 
 // TODO The internal representation should be converted to UTF-8
 using String = std::basic_string<Glyph>;
