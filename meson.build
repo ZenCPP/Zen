@@ -41,6 +41,16 @@ zen_compile_args = [
   '-DZEN_NAMESPACE_END=' + zen_namespace_end,
 ]
 
+if get_option('nostdlib')
+  zen_compile_args += [
+    '-nostdlib',
+  ]
+else
+  zen_compile_args += [
+    '-DZEN_STL=1',
+  ]
+endif
+
 zen_lib = static_library(
   'zen',
   zen_sources,
@@ -78,11 +88,13 @@ executable(
   'zen/common_test.cc',
   'zen/serde_test.cc',
   'zen/dllist_test.cc',
+  'zen/either_test.cc',
   'zen/vector_test.cc',
   'zen/clone_ptr_test.cc',
   'zen/fs_test.cc',
   'zen/po_test.cc',
   'zen/lexgen/lexer_test.cc',
+  'zen/lexgen/parser_test.cc',
   zen_lexgen_sources,
   include_directories: '.',
   cpp_args: [ '-Wall' ],
