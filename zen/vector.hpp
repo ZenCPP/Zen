@@ -41,6 +41,11 @@ class Vector {
 public:
 
   using Value = T;
+  using Size = SizeT;
+  using Iter = T*;
+
+  using value_type = T;
+  using size_type = SizeT;
 
 private:
 
@@ -52,7 +57,7 @@ private:
 public:
 
   template<typename RangeT>
-  Vector(std::enable_if_t<is_range_<RangeT>::value, RangeT> range, AllocatorT allocator = AllocatorT()):
+  Vector(std::enable_if_t<IsRange<RangeT>::value, RangeT> range, AllocatorT allocator = AllocatorT()):
     _allocator(allocator),
     _capacity(range.size()),
     _sz(range.size()),
@@ -120,6 +125,14 @@ public:
 
   inline SizeT capacity() const {
     return _capacity;
+  }
+
+  inline Iter begin() {
+    return _ptr;
+  }
+
+  inline Iter end() {
+    return _ptr + _sz;
   }
 
   inline SizeT size() const {
