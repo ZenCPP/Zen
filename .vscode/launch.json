@@ -10,7 +10,8 @@
             "name": "Debug",
             "program": "${workspaceFolder}/build/alltests",
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Build Tests"
         }
     ]
 }
