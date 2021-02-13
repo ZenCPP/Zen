@@ -1,0 +1,8 @@
+
+// This is an example grammar
+
+identifier-start = [a-zA-Z]
+identifier-part = [a-zA-Z0-9]
+
+pub identifier = identifier-start identifier-part*
+
