@@ -10,20 +10,17 @@
 ZEN_NAMESPACE_START
 
 template <typename T, typename = void>
-struct is_range_ : false_ {};
+struct IsRange : False {};
 
 template <typename T>
-struct is_range_<
+struct IsRange<
     T,
     std::void_t<
          decltype(std::declval<T&>().begin()),
          decltype(std::declval<T&>().end()),
          typename T::value_type
        >
-   > : true_ {};
-
-template<typename T>
-using is_range_v = typename is_range_<T>::value;
+   > : True {};
 
 template<typename Range, typename Fn, typename OutIt>
 inline typename std::invoke_result<Fn(typename Range::value_type)>::type transform(Range range, Fn transformer, OutIt out) {
