@@ -1,3 +1,4 @@
 option('assertions', type: 'boolean', value: true)
 option('namespace', type: 'string', value: 'zen')
 option('nostdlib', type: 'boolean', value: false)
+option('intrinsics', type: 'boolean', value: true)

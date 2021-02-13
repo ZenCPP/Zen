@@ -11,6 +11,8 @@ zen_sources = [
   'zen/fs_common.cc',
 ]
 
+zen_enable_intrinsics = get_option('intrinsics')
+
 zen_namespace = get_option('namespace')
 zen_namespace_start = ''
 zen_namespace_end = ''
@@ -49,6 +51,35 @@ else
   zen_compile_args += [
     '-DZEN_STL=1',
   ]
+endif
+
+cpp = meson.get_compiler('cpp')
+
+if zen_enable_intrinsics
+
+  if cpp.compiles(
+'''
+#include <utility>
+using T = __make_integer_seq<std::integer_sequence, int, 10>;
+''',
+    name: '__make_integer_seq',
+  )
+    zen_compile_args += [
+      '-DZEN_FEAT_MAKE_INTEGER_SEQ=1',
+    ]
+  endif
+
+  if cpp.compiles(
+'''
+using T = __type_pack_element<1, short, int, long>;
+''',
+    name: '__type_pack_element',
+  )
+    zen_compile_args += [
+      '-DZEN_FEAT_TYPE_PACK_ELEMENT=1',
+    ]
+  endif
+
 endif
 
 zen_lib = static_library(
