@@ -19,8 +19,7 @@ code regularly.
 You may consider Zen++ a standard library that isn't limited by the requirement
 of being backwards-compatible. Zen++ designed to be lightweight, fast and
 feature-complete, but without a stable ABI. This allows us to move faster than
-the STL is able to and fix inconsistencies much more easily. It's your job to keep in
-sync.
+the STL is able to and fix inconsistencies much more easily.
 
 ### What are the drawbacks?
 
