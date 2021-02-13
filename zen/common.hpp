@@ -1,9 +1,14 @@
 #ifndef ZEN_CLONE_HPP
 #define ZEN_CLONE_HPP
 
+#include <algorithm>
+#include <utility>
+
+#include "zen/meta.hpp"
+
 ZEN_NAMESPACE_START
 
-#include <utility>
+using size_t = std::size_t;
 
 /// \brief Custom logic for cloning a specific type.
 template<typename T, typename Enabler = void>
@@ -39,6 +44,19 @@ template<typename R, typename T>
 inline R into(T value) {
   return Into<T, R>::apply(value);
 }
+
+#if ZEN_STL
+
+template<typename T, typename R>
+struct Into<T, R, EnableIf<IsContainer<R>::value>> {
+  static R apply(T value) {
+    R result;
+    std::copy(value.begin(), value.end(), default_inserter(result));
+    return result;
+  }
+};
+
+#endif
 
 ZEN_NAMESPACE_END
 
