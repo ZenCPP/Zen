@@ -3,6 +3,7 @@
 
 #include <deque>
 
+#include "zen/meta.hpp"
 #include "zen/maybe.hpp"
 
 ZEN_NAMESPACE_START
@@ -69,25 +70,30 @@ public:
 
 };
 
+template<typename ContainerT, typename Enabler = void>
+class StreamWrapper;
 
-template<typename ContainerT>
-class StreamWrapper : public PeekStream<typename ContainerT::value_type> {
+template<typename T>
+class StreamWrapper<
+  T,
+  typename EnableIf<IsContainer<T>::value || IsCollection<T>::value>::Type
+> : public PeekStream<typename T::value_type> {
 public:
 
-  using size_type = typename ContainerT::size_type;
-  using value_type = typename ContainerT::value_type;
+  using Size = typename T::size_type;
+  using Value = typename T::value_type;
 
 private:
 
-  ContainerT& data;
-  size_type offset;
+  T& data;
+  Size offset;
 
 public:
 
-  StreamWrapper(ContainerT& data, size_type offset = 0):
+  StreamWrapper(T& data, Size offset = 0):
     data(data), offset(offset) {}
 
-  Maybe<value_type> get() override {
+  Maybe<Value> get() override {
     if (offset < data.size()) {
       return data[offset++];
     } else {
@@ -95,7 +101,7 @@ public:
     }
   }
 
-  Maybe<value_type> peek(size_type lookahead_offset) override {
+  Maybe<Value> peek(Size lookahead_offset) override {
     auto real_offset = offset + lookahead_offset - 1;
     if (real_offset < data.size()) {
       return data[real_offset];
@@ -107,9 +113,9 @@ public:
 
 };
 
-template<typename ContainerT>
-inline StreamWrapper<ContainerT> make_stream(ContainerT& data, typename ContainerT::size_type offset = 0) {
-  return StreamWrapper<ContainerT>(data);
+template<typename T>
+inline StreamWrapper<T> make_stream(T& data, typename T::size_type offset = 0) {
+  return StreamWrapper<T>(data);
 }
 
 ZEN_NAMESPACE_END
