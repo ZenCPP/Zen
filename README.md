@@ -10,7 +10,7 @@ future, it might even be possible to use the headers without any runtime
 dependency on the C++ standard library.
 
 ⚠️🧪 These libraries are experimental. They require a modern C++ compiler that
-supports at least C++17. The API may break regularly with the release of new
+supports at least C++20. The API may break regularly with the release of new
 versions. If you plan to make use of them right now, expect to refactor your
 code regularly.
 

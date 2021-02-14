@@ -1532,6 +1532,40 @@ struct IsContainer<T,
 
 #endif
 
+template<typename T, typename U>
+constexpr const bool same_as = false;
+
+template<typename T>
+inline constexpr const bool same_as<T, T> = true;
+
+template< class T, class U >
+concept _SameAsHelper = same_as<T, U>;
+
+template< class T, class U >
+concept SameAs = _SameAsHelper<T, U> && _SameAsHelper<U, T>;
+
+template<typename T>
+struct MakeDiff;
+
+template<>
+struct MakeDiff<unsigned long> {
+  using Type = long;
+};
+
+template<>
+struct MakeDiff<unsigned int> {
+  using Type = int;
+};
+
+template<>
+struct MakeDiff<unsigned short> {
+  using Type = short;
+};
+
+template<typename T>
+using MakeDiffT = typename MakeDiff<T>::Type;
+
 ZEN_NAMESPACE_END
 
 #endif // ZEN_META_HPP
+

@@ -87,7 +87,7 @@ zen_lib = static_library(
   zen_sources,
   include_directories: '.',
   cpp_args: zen_compile_args,
-  override_options: ['cpp_std=c++17'],
+  override_options: ['cpp_std=c++2a'],
 )
 
 zen_dep = declare_dependency(
@@ -102,14 +102,14 @@ executable(
   zen_lexgen_sources,
   link_with: zen_lib,
   include_directories: '.',
-  override_options: ['cpp_std=c++17'],
+  override_options: ['cpp_std=c++2a'],
 )
 
 executable(
   'po-example',
   'zen/po_sample_main.cc',
   link_with: zen_lib,
-  override_options: ['cpp_std=c++17'],
+  override_options: ['cpp_std=c++2a'],
   build_by_default: false,
 )
 
@@ -130,7 +130,7 @@ executable(
   include_directories: '.',
   cpp_args: [ '-Wall' ],
   dependencies: [ zen_dep, gtest_dep, gtest_main_dep ],
-  override_options: ['cpp_std=c++17'],
+  override_options: ['cpp_std=c++2a'],
   build_by_default: false,
 )
 
