@@ -10,7 +10,9 @@ ZEN_NAMESPACE_START
 
 using size_t = std::size_t;
 
-/// \brief Custom logic for cloning a specific type.
+/**
+ * @brief Custom logic for cloning a specific type.
+ */
 template<typename T, typename Enabler = void>
 struct Clone {
 
@@ -22,13 +24,17 @@ struct Clone {
 
 };
 
-/// \brief Make an exact copy of the given value in a new memory location.
+/**
+ * @brief Make an exact copy of the given value in a new memory location.
+ */
 template<typename T>
 T clone(const T& value) {
   return Clone<T>::apply(value);
 }
 
-/// \brief Non-trivial conversions from one type to another.
+/**
+ * @brief Non-trivial conversions from one type to another.
+ */
 template<typename T, typename R, typename Enabler = void>
 struct Into;
 
@@ -39,7 +45,9 @@ struct Into<const T[N], R>  {
   }
 };
 
-/// \brief Take an input value and produce a related value of the desired type.
+/**
+ * @brief Take an input value and produce a related value of the desired type.
+ */
 template<typename R, typename T>
 inline R into(T value) {
   return Into<T, R>::apply(value);
