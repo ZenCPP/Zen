@@ -15,10 +15,10 @@ struct IsRange : False {};
 template <typename T>
 struct IsRange<
     T,
-    std::void_t<
-         decltype(std::declval<T&>().begin()),
-         decltype(std::declval<T&>().end()),
-         typename T::value_type
+    VoidT<
+         decltype(declval<T&>().begin()),
+         decltype(declval<T&>().end()),
+         typename T::Value
        >
    > : True {};
 
@@ -29,31 +29,35 @@ inline typename std::invoke_result<Fn(typename Range::value_type)>::type transfo
   }
 }
 
-/// @brief A range derived from two STL iterators
-///
-/// This wrapper type enables passing down an iterator pair to other
-/// functions in a single parameter.
+/**
+ * @brief A range derived from two iterators
+ * 
+ * This wrapper type enables passing down an iterator pair to other
+ * functions in a single parameter.
+ */
 template<typename IterT>
 class IterRange {
 public:
 
   using Iter = IterT;
   using Value = typename IterTraits<IterT>::Value;
+  using Diff = typename IterTraits<IterT>::Diff;
 
   using value_type = Value;
+  using difference_type = Diff;
 
 private:
 
-  Iter begin_iter;
+  Iter _begin;
   Iter end_iter;
 
 public:
 
-  inline IterRange(Iter begin_iter, Iter end_iter):
-    begin_iter(begin_iter), end_iter(end_iter) {}
+  inline IterRange(Iter begin, Iter end):
+    _begin(begin), end_iter(end) {}
 
   inline Iter begin() {
-    return begin_iter;
+    return _begin;
   }
 
   inline Iter end() {

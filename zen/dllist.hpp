@@ -38,17 +38,19 @@ class DLIter {
 public:
 
   using Value = T;
+  using Size = SizeT;
+  using Diff = MakeDiffT<SizeT>;
 
   using value_type = Value;
 
   inline DLIter(DLListNode<T>* current):
     current(current) {}
 
-  bool operator==(const DLIter& other) {
+  bool operator==(const DLIter& other) const {
     return other.current == current;
   }
 
-  bool operator!=(const DLIter& other) {
+  bool operator!=(const DLIter& other) const {
     return other.current != current;
   }
 
@@ -82,6 +84,8 @@ class DLList {
 public:
 
   using Value = T;
+  using Ref = Value;
+  using Size = SizeT;
   using Iter = DLIter<T, SizeT, AllocatorT>;
   using Range = IterRange<Iter>;
 
