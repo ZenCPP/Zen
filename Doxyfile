@@ -829,7 +829,20 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = include/zen DOCS_HOME.md
+INPUT = \
+  zen/config.h \
+  zen/macros.h \
+  zen/meta.hpp \
+  zen/maybe.hpp \
+  zen/either.hpp \
+  zen/iterator.hpp \
+  zen/range.hpp \
+  zen/byte.hpp \
+  zen/string.hpp \
+  zen/stream.hpp \
+  zen/fs.hpp \
+  zen/po.hpp \
+  DOCS_HOME.md
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
